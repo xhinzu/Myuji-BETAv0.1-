@@ -75,3 +75,4 @@ MyuJiku is designed with a **local-first philosophy**:
 - **Idle CPU**: < 2% CPU utilization with static lyric stage.
 - **Audio Latency**: Sub-10ms buffer latency via Web Audio API.
 - **Clock Drift**: Synchronized Listen Together rooms drift-corrected within 50ms.
+

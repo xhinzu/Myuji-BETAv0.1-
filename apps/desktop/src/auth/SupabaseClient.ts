@@ -134,3 +134,4 @@ export class SupabaseManager {
     return null;
   }
 }
+

@@ -89,3 +89,4 @@ export const CameraStage: React.FC<CameraStageProps> = ({
     </div>
   );
 };
+

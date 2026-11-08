@@ -67,3 +67,4 @@ export const ClassicStage: React.FC<ClassicStageProps> = ({
     </div>
   );
 };
+

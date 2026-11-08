@@ -54,3 +54,4 @@ class AppLogger {
 }
 
 export const Logger = AppLogger.getInstance();
+

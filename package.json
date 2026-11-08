@@ -6,13 +6,16 @@
   "type": "module",
   "packageManager": "pnpm@12.18.0",
   "scripts": {
-    "dev": "pnpm --filter desktop dev",
+    "dev": "pnpm --filter myujiku-desktop dev",
+    "desktop:tauri": "pnpm --filter myujiku-desktop tauri dev",
+    "desktop:build": "pnpm --filter myujiku-desktop build",
     "build": "pnpm -r run build",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write \"**/*.{ts,tsx,json,md,css}\"",
-    "tauri": "pnpm --filter desktop tauri",
+    "tauri": "pnpm --filter myujiku-desktop tauri",
+    "aligner:start": "python -m services.aligner.aligner.main",
     "aligner:test": "python -m pytest -c services/aligner/pytest.ini services/aligner"
   },
   "devDependencies": {

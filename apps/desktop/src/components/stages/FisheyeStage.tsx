@@ -109,3 +109,4 @@ export const FisheyeStage: React.FC<FisheyeStageProps> = ({
     </div>
   );
 };
+

@@ -538,3 +538,4 @@ function parseEnhancedLineWords(
     lineEnd: roundMs(lineEnd),
   };
 }
+

@@ -274,3 +274,4 @@ export const WebStage: React.FC<WebStageProps> = ({
     </div>
   );
 };
+

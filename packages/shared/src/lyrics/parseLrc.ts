@@ -43,3 +43,4 @@ export function parseLrc(lrcContent: string): RawParsedLine[] {
 
   return parsedLines.sort((a, b) => a.time - b.time);
 }
+

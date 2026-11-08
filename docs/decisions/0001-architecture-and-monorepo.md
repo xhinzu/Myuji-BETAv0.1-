@@ -32,3 +32,4 @@ By isolating all parsing, sync math, and styling calculations into a standalone 
 ## Consequences
 - Requires Rust MSVC toolchain (configured at `F:\vbcode\rust`).
 - Audio files are decoded and processed in the webview via Web Audio API, while stream routing and metadata extraction are managed by Rust.
+

@@ -28,3 +28,4 @@ describe('fixAllCapsLrc', () => {
     expect(output).toContain('[00:10.00] We have known each other');
   });
 });
+

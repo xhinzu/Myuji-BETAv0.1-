@@ -98,3 +98,4 @@ describe('Enhanced LRC Parser and Writer', () => {
     }
   });
 });
+

@@ -109,3 +109,4 @@ export const InvertedFisheyeStage: React.FC<InvertedFisheyeStageProps> = ({
     </div>
   );
 };
+

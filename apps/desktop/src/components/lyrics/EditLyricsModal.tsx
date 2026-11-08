@@ -211,3 +211,4 @@ export const EditLyricsModal: React.FC<EditLyricsModalProps> = ({ isOpen, onClos
     </div>
   );
 };
+

@@ -195,3 +195,4 @@ export const AccountModal: React.FC<AccountModalProps> = ({ isOpen, onClose }) =
     </div>
   );
 };
+

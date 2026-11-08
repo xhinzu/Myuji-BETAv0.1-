@@ -95,3 +95,4 @@ describe('Theme & OKLCH Design Tokens', () => {
     expect(decoded.uiScale).toBe(125);
   });
 });
+

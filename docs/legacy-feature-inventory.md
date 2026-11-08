@@ -92,3 +92,4 @@ This document exhaustively catalogs every feature, component, and utility presen
 
 ## 3. Strict Parity Verification Rule
 Every single feature listed above is tracked in `docs/PROGRESS.md` and verified in `docs/parity-matrix.md`. No legacy capability will be omitted.
+

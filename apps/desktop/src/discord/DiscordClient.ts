@@ -131,3 +131,4 @@ export class DiscordClient {
     return `🎵 Listening to ${track.title} - ${track.artist} on MyuJiku`;
   }
 }
+

@@ -69,3 +69,4 @@ Users and developers can inspect the YouTube provider health at any time:
   - Cache utilization (MB / 500 MB limit)
   - Last error code and timestamp
   - "Test Video Resolution" action button to verify connectivity
+

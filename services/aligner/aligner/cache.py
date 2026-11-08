@@ -59,3 +59,4 @@ class AlignmentCache:
                 (cache_hash, result_json, enhanced_lrc, model, now, cache_hash),
             )
             conn.commit()
+

@@ -88,3 +88,4 @@ export function useMediaSession(): void {
     };
   }, [togglePlay, skipNext, skipPrev, seek, currentTime]);
 }
+

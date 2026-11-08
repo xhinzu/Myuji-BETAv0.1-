@@ -99,3 +99,4 @@ export function deriveWordTimingsFromLrc(
 
   return syncedLines;
 }
+

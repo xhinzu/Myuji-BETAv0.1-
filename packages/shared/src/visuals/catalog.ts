@@ -87,3 +87,4 @@ export function getEffectIdForWord(word: string): string | undefined {
   const clean = word.toLowerCase().replace(/[^a-z0-9]/g, '');
   return WORD_TO_EFFECT_MAP[clean];
 }
+

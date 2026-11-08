@@ -113,3 +113,4 @@ export const BranchesStage: React.FC<BranchesStageProps> = ({
     </div>
   );
 };
+

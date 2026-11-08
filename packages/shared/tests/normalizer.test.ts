@@ -40,3 +40,4 @@ describe('Music Metadata Normalizer', () => {
     expect(result?.title).toBe('Circles');
   });
 });
+

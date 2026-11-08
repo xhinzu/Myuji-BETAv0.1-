@@ -44,3 +44,4 @@ Echoing the origami / low-poly cat logo:
 - Maximizes screen real estate for immersive lyrics animations.
 - Provides immediate keyboard-driven access via Command Palette (`Ctrl+K`).
 - Seamlessly scales down to compact desktop windows (~900x600) and dedicated Mini-Player mode.
+

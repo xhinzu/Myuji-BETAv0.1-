@@ -71,3 +71,4 @@ Third verse after an instrumental break
     expect(result[1].end).toBeLessThanOrEqual(result[2].start);
   });
 });
+

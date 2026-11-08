@@ -82,3 +82,4 @@ In heavy mixes (metal, EDM, dense rock), background percussion or synthesizers c
 
 - **Zero YouTube Audio Upload**: If aligning a YouTube song, audio is read directly from the ephemeral local temp cache on the user's computer. It is NEVER sent to remote aligner endpoints.
 - **Local Sidecar Token Authentication**: Communication between MyuJiku Desktop and the local Python service requires an ephemeral cryptographic header `X-MyuJiku-Sidecar-Token`.
+

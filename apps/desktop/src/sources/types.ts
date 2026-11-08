@@ -19,3 +19,4 @@ export interface TrackSourceProvider {
   resolveAudio(track: Track): Promise<string>;
   getLicenseInfo?(track: Track): LicenseInfo;
 }
+

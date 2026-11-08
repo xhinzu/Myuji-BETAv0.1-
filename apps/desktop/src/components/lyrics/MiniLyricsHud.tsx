@@ -100,3 +100,4 @@ export const MiniLyricsHud: React.FC<MiniLyricsHudProps> = ({ isOpen, onClose })
     </motion.div>
   );
 };
+

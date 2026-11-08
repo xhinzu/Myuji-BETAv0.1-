@@ -126,3 +126,4 @@ export const ConstellationStage: React.FC<ConstellationStageProps> = ({
     </div>
   );
 };
+

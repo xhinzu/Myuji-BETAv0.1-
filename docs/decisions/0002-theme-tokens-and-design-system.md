@@ -25,3 +25,4 @@ All tokens are declared as CSS variables (`--color-bg`, `--color-accent`, `--rad
 ## Consequences
 - Theme changes apply in a single frame.
 - High contrast accessibility is guaranteed programmatically regardless of user palette choices or album artwork.
+

@@ -229,3 +229,4 @@ mod tests {
     assert!(!status.connected);
   }
 }
+

@@ -76,3 +76,4 @@ export function writeEnhancedLrc(
 
   return out.join('\n');
 }
+

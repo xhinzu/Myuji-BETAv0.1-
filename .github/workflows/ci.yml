@@ -49,3 +49,4 @@ jobs:
           cd services/aligner
           python -m pip install -r requirements.txt || true
           pytest || true
+

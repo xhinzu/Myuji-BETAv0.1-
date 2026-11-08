@@ -43,3 +43,4 @@ We implement **Option A (Rust Loopback Range-Proxy)** as the primary playback en
 - **100% Web Audio API compatibility** with raw audio effects and frequency analyser.
 - **Zero persistent audio footprints** satisfying the non-persistence security model.
 - **Automatic token rotation and loopback isolation** preventing unauthorized local processes from relaying streams.
+
