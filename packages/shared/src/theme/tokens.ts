@@ -77,6 +77,14 @@ export const DEFAULT_THEME_SETTINGS: ThemeSettings = {
   blurLevel: 16,
   motionLevel: 'full',
   animationSpeed: 1.0,
+  lyricStyle: 'classic',
+  edgeGlowStyle: 'vignette',
+  edgeGlowMode: 'music_sync',
+  backgroundMode: 'blurred_cover',
+  overlayEffect: 'stars',
+  cameraMotion: 'subtle',
+  cameraZoom: 100,
+  chromaMode: false,
 };
 
 /**

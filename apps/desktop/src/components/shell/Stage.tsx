@@ -3,18 +3,20 @@ import { usePlayerStore } from '../../stores/playerStore';
 import { useSettingsStore } from '../../stores/settingsStore';
 import { RotateCw } from 'lucide-react';
 
-interface Particle {
-  x: number;
-  y: number;
-  radius: number;
-  vx: number;
-  vy: number;
-  alpha: number;
-  alphaTarget: number;
-}
+import { ClassicStage } from '../stages/ClassicStage';
+import { VisualStage } from '../stages/VisualStage';
+import { ConstellationStage } from '../stages/ConstellationStage';
+import { ShipStage } from '../stages/ShipStage';
+import { CameraStage } from '../stages/CameraStage';
+import { FisheyeStage } from '../stages/FisheyeStage';
+import { InvertedFisheyeStage } from '../stages/InvertedFisheyeStage';
+import { CodestyleStage } from '../stages/CodestyleStage';
+import { BranchesStage } from '../stages/BranchesStage';
+import { WebStage } from '../stages/WebStage';
+import { EdgeGlowOverlay } from '../stages/EdgeGlowOverlay';
+import { ParticleOverlay } from '../stages/ParticleOverlay';
 
 export const Stage: React.FC<{ onUserActive?: () => void }> = ({ onUserActive }) => {
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const {
     currentTrack,
     activeLyrics,
@@ -81,83 +83,127 @@ export const Stage: React.FC<{ onUserActive?: () => void }> = ({ onUserActive })
     setIsManualScroll(false);
   };
 
-  // Subtle ambient particle background
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    let animId: number;
-    const width = (canvas.width = window.innerWidth);
-    const height = (canvas.height = window.innerHeight);
-
-    const handleResize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    window.addEventListener('resize', handleResize);
-
-    const particleCount = settings.theme.motionLevel === 'off' ? 0 : 45;
-    const particles: Particle[] = [];
-
-    for (let i = 0; i < particleCount; i++) {
-      particles.push({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        radius: Math.random() * 1.5 + 0.5,
-        vx: (Math.random() - 0.5) * 0.25,
-        vy: (Math.random() - 0.5) * 0.25,
-        alpha: Math.random() * 0.4 + 0.1,
-        alphaTarget: Math.random() * 0.4 + 0.1,
-      });
-    }
-
-    const render = () => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      for (const p of particles) {
-        p.x += p.vx;
-        p.y += p.vy;
-
-        if (p.x < 0) p.x = canvas.width;
-        if (p.x > canvas.width) p.x = 0;
-        if (p.y < 0) p.y = canvas.height;
-        if (p.y > canvas.height) p.y = 0;
-
-        ctx.fillStyle = `rgba(255, 255, 255, ${p.alpha})`;
-        ctx.beginPath();
-        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
-        ctx.fill();
-      }
-
-      animId = requestAnimationFrame(render);
-    };
-
-    render();
-
-    return () => {
-      cancelAnimationFrame(animId);
-      window.removeEventListener('resize', handleResize);
-      if (manualScrollTimerRef.current) clearTimeout(manualScrollTimerRef.current);
-    };
-  }, [settings.theme.motionLevel]);
-
   const displayCenterIndex = isManualScroll ? manualScrollLineIndex : activeLineIndex;
+
+  // Background style computation
+  const backgroundMode = settings.theme.backgroundMode || 'blurred_cover';
+  const coverUrl = currentTrack?.artworkUrl;
+
+  const renderBackground = () => {
+    switch (backgroundMode) {
+      case 'amoled':
+        return <div className="absolute inset-0 bg-black z-0 pointer-events-none" />;
+      case 'cover':
+        return coverUrl ? (
+          <div
+            className="absolute inset-0 bg-center bg-cover opacity-25 z-0 pointer-events-none transition-all duration-700"
+            style={{ backgroundImage: `url(${coverUrl})` }}
+          />
+        ) : (
+          <div className="absolute inset-0 bg-black/90 z-0 pointer-events-none" />
+        );
+      case 'gradient':
+        return (
+          <div
+            className="absolute inset-0 z-0 pointer-events-none opacity-40 transition-all duration-700"
+            style={{
+              background: `radial-gradient(circle at 50% 50%, var(--color-accent) 0%, transparent 70%), linear-gradient(to bottom, #09090b, #000000)`,
+            }}
+          />
+        );
+      case 'blurred_cover':
+      default:
+        return (
+          <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+            {coverUrl ? (
+              <div
+                className="absolute -inset-10 bg-center bg-cover filter blur-3xl opacity-20 scale-110 transition-all duration-1000"
+                style={{ backgroundImage: `url(${coverUrl})` }}
+              />
+            ) : (
+              <div
+                className="absolute -inset-10 filter blur-3xl opacity-15"
+                style={{
+                  background: 'radial-gradient(circle at 50% 50%, var(--color-accent) 0%, transparent 60%)',
+                }}
+              />
+            )}
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-[2px]" />
+          </div>
+        );
+    }
+  };
+
+  // Render selected lyrics style component
+  const renderLyricsStage = () => {
+    const style = settings.theme.lyricStyle || 'classic';
+    const props = {
+      lyrics: activeLyrics,
+      activeLineIndex: displayCenterIndex,
+      activeWordIndex,
+      onSeek: seek,
+    };
+
+    switch (style) {
+      case 'visual':
+        return <VisualStage {...props} />;
+      case 'constellation':
+        return <ConstellationStage {...props} />;
+      case 'ship':
+        return <ShipStage {...props} />;
+      case 'camera':
+        return <CameraStage {...props} />;
+      case 'fisheye':
+        return <FisheyeStage {...props} />;
+      case 'inverted_fisheye':
+        return <InvertedFisheyeStage {...props} />;
+      case 'codestyle':
+        return <CodestyleStage {...props} />;
+      case 'branches':
+        return <BranchesStage {...props} />;
+      case 'web':
+        return <WebStage {...props} />;
+      case 'classic':
+      default:
+        return <ClassicStage {...props} />;
+    }
+  };
+
+  // Camera motion and zoom styles
+  const zoomScale = (settings.theme.cameraZoom || 100) / 100;
+  const cameraMotion = settings.theme.cameraMotion || 'subtle';
+
+  let motionClass = '';
+  if (cameraMotion === 'subtle') {
+    motionClass = 'transition-transform duration-700 ease-out';
+  } else if (cameraMotion === 'cinematic') {
+    motionClass = 'transition-transform duration-1000 ease-in-out animate-pulse';
+  }
+
+  const isChroma = settings.theme.chromaMode;
 
   return (
     <div
-      className="relative w-full h-full overflow-hidden select-none"
+      className={`relative w-full h-full overflow-hidden select-none ${isChroma ? 'animate-[hue-rotate_15s_linear_infinite]' : ''}`}
       onMouseMove={onUserActive}
       onClick={onUserActive}
       onWheel={handleWheel}
     >
-      {/* Background Starfield Canvas */}
-      <canvas ref={canvasRef} className="absolute inset-0 pointer-events-none z-0" />
+      {/* 1. Background Layer */}
+      {renderBackground()}
 
-      {/* Manual Scroll 4-second Pause Floating Indicator */}
+      {/* 2. Particle Effect Overlay */}
+      <ParticleOverlay effect={settings.theme.overlayEffect || 'none'} />
+
+      {/* 3. Edge Glow Overlay */}
+      <EdgeGlowOverlay
+        style={settings.theme.edgeGlowStyle || 'off'}
+        mode={settings.theme.edgeGlowMode || 'reactive'}
+      />
+
+      {/* 4. Manual Scroll 4-second Pause Floating Indicator */}
       {isManualScroll && (
-        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-20 px-3 py-1 bg-bg-surface/90 border border-accent/40 clip-chamfer-sm backdrop-blur-md flex items-center gap-2 text-xs text-zinc-300 animate-fade-in shadow-lg">
+        <div className="absolute top-6 left-1/2 -translate-x-1/2 z-30 px-3 py-1 bg-bg-surface/90 border border-accent/40 clip-chamfer-sm backdrop-blur-md flex items-center gap-2 text-xs text-zinc-300 animate-fade-in shadow-lg">
           <span className="w-1.5 h-1.5 rounded-full bg-accent animate-ping" />
           <span>Auto-scroll paused</span>
           <button
@@ -171,56 +217,13 @@ export const Stage: React.FC<{ onUserActive?: () => void }> = ({ onUserActive })
         </div>
       )}
 
-      {/* Main Lyrics Stage Area */}
-      <div className="relative z-10 w-full h-full flex flex-col items-center justify-center px-12 py-20 text-center">
+      {/* 5. Main Content Area with Zoom & Camera Motion */}
+      <div
+        className={`relative z-10 w-full h-full flex flex-col items-center justify-center px-6 py-16 text-center ${motionClass}`}
+        style={{ transform: `scale(${zoomScale})` }}
+      >
         {currentTrack && activeLyrics.length > 0 ? (
-          <div className="max-w-3xl space-y-4">
-            {activeLyrics
-              .slice(Math.max(0, displayCenterIndex - 2), displayCenterIndex + 3)
-              .map((line, idx) => {
-                const actualLineIdx = Math.max(0, displayCenterIndex - 2) + idx;
-                const isCurrent = actualLineIdx === activeLineIndex;
-
-                return (
-                  <div
-                    key={`${line.id}-${actualLineIdx}`}
-                    onClick={() => seek(line.start)}
-                    title="Click line to jump / calibrate"
-                    className={`transition-all duration-300 font-bold cursor-pointer hover:opacity-100 ${
-                      isCurrent
-                        ? 'text-3xl md:text-5xl text-white scale-105 drop-shadow-[0_0_20px_var(--color-accent-glow)]'
-                        : 'text-xl md:text-2xl text-white/30 filter blur-[0.5px] hover:blur-none'
-                    }`}
-                  >
-                    {isCurrent && line.words && line.words.length > 0 ? (
-                      <span className="inline-flex flex-wrap justify-center gap-x-2">
-                        {line.words.map((w, wIdx) => {
-                          const isWordActive = wIdx === activeWordIndex;
-                          return (
-                            <span
-                              key={`${w.text}-${wIdx}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                seek(w.start);
-                              }}
-                              className={`transition-colors cursor-pointer hover:underline ${
-                                isWordActive
-                                  ? 'text-accent underline decoration-accent/60 underline-offset-8'
-                                  : 'text-white'
-                              }`}
-                            >
-                              {w.text}
-                            </span>
-                          );
-                        })}
-                      </span>
-                    ) : (
-                      line.text
-                    )}
-                  </div>
-                );
-              })}
-          </div>
+          renderLyricsStage()
         ) : (
           /* Ambient Idle State when no song is playing */
           <div className="flex flex-col items-center justify-center max-w-md text-center p-8 bg-bg-surface/40 backdrop-blur-md border border-border-subtle clip-chamfer animate-fade-in">

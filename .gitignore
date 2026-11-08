@@ -11,6 +11,7 @@ src-tauri/target/
 **/src-tauri/target/
 .tauri/
 *.tsbuildinfo
+**/*.tsbuildinfo
 
 # Python
 __pycache__/

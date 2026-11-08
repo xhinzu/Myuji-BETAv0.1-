@@ -78,7 +78,7 @@ export type LyricsFont =
   | 'fira_code'
   | 'cinzel';
 
-export type EdgeGlowMode = 'music_sync' | 'static';
+export type EdgeGlowMode = 'reactive' | 'ambient' | 'static' | 'music_sync';
 
 export type EdgeGlowStyle =
   | 'ring'
@@ -90,7 +90,8 @@ export type EdgeGlowStyle =
   | 'neon_tube'
   | 'conic'
   | 'ripple'
-  | 'breathing';
+  | 'breathing'
+  | 'off';
 
 // --- 2. Music Source & Playback Types ---
 
@@ -298,6 +299,14 @@ export interface ThemeSettings {
   blurLevel: number; // 0 to 24px
   motionLevel: MotionLevel;
   animationSpeed: number; // 0.5 to 1.5
+  lyricStyle: LyricsStyle;
+  edgeGlowStyle: EdgeGlowStyle;
+  edgeGlowMode: EdgeGlowMode;
+  backgroundMode: 'amoled' | 'cover' | 'blurred_cover' | 'gradient';
+  overlayEffect: 'none' | 'rain' | 'snow' | 'dust' | 'embers' | 'stars' | 'scanlines' | 'grain' | 'bokeh';
+  cameraMotion: 'off' | 'subtle' | 'cinematic';
+  cameraZoom: number; // 50 to 200 percentage
+  chromaMode: boolean;
   customCssVariables?: Record<string, string>;
 }
 

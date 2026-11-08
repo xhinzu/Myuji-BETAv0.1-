@@ -8,6 +8,7 @@ import {
   RotateCcw,
   Download,
   Check,
+  Sparkles,
 } from 'lucide-react';
 import { useSettingsStore } from '../../stores/settingsStore';
 import {
@@ -18,6 +19,9 @@ import {
   ThemeMode,
   CornerStyle,
   DensityStyle,
+  LyricsStyle,
+  EdgeGlowStyle,
+  EdgeGlowMode,
 } from '@myujiku/shared';
 
 export const SettingsView: React.FC = () => {
@@ -256,6 +260,204 @@ export const SettingsView: React.FC = () => {
                 className="px-3 py-1 text-xs bg-accent text-white font-semibold clip-chamfer-sm"
               >
                 Import
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 1.5. Stage Visuals & Lyric Styles (10 Styles, Glow, Overlays, Camera) */}
+      <section className="space-y-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2 text-accent">
+            <Sparkles className="w-4 h-4" />
+            <h2 className="text-sm font-bold uppercase tracking-wider text-white">Stage & Lyric Visuals</h2>
+          </div>
+        </div>
+
+        <div className="p-5 bg-bg-surface/80 border border-border-base clip-chamfer backdrop-blur-md space-y-5 text-xs">
+          {/* Lyric Visual Style (10 styles) */}
+          <div>
+            <label className="font-semibold text-zinc-300 block mb-2">Lyric Stage Style (10 Styles)</label>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+              {(
+                [
+                  'classic',
+                  'visual',
+                  'constellation',
+                  'ship',
+                  'camera',
+                  'fisheye',
+                  'inverted_fisheye',
+                  'codestyle',
+                  'branches',
+                  'web',
+                ] as LyricsStyle[]
+              ).map((style) => (
+                <button
+                  key={style}
+                  type="button"
+                  onClick={() => updateTheme({ lyricStyle: style })}
+                  className={`p-2 text-left border clip-chamfer-sm capitalize transition-colors ${
+                    (settings.theme.lyricStyle || 'classic') === style
+                      ? 'bg-accent/20 border-accent text-white font-bold'
+                      : 'bg-bg-elevated/40 border-border-subtle text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  <span className="block truncate">{style.replace('_', ' ')}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Edge Glow Style & Mode */}
+          <div className="space-y-3 pt-3 border-t border-border-subtle">
+            <div className="flex items-center justify-between">
+              <label className="font-semibold text-zinc-300">Edge Glow Style</label>
+              <div className="flex items-center gap-1">
+                {(['reactive', 'ambient', 'static'] as EdgeGlowMode[]).map((mode) => (
+                  <button
+                    key={mode}
+                    type="button"
+                    onClick={() => updateTheme({ edgeGlowMode: mode })}
+                    className={`px-2 py-0.5 text-[10px] uppercase font-bold rounded ${
+                      (settings.theme.edgeGlowMode || 'reactive') === mode
+                        ? 'bg-accent text-white'
+                        : 'text-zinc-500 hover:text-zinc-300'
+                    }`}
+                  >
+                    {mode}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="grid grid-cols-3 sm:grid-cols-6 gap-1.5">
+              {(
+                [
+                  'ring',
+                  'corners',
+                  'bars',
+                  'vignette',
+                  'spotlight',
+                  'aurora',
+                  'neon_tube',
+                  'conic',
+                  'ripple',
+                  'breathing',
+                  'off',
+                ] as EdgeGlowStyle[]
+              ).map((glow) => (
+                <button
+                  key={glow}
+                  type="button"
+                  onClick={() => updateTheme({ edgeGlowStyle: glow })}
+                  className={`py-1.5 text-center border clip-chamfer-sm capitalize text-[11px] transition-colors ${
+                    (settings.theme.edgeGlowStyle || 'off') === glow
+                      ? 'bg-accent/20 border-accent text-white font-semibold'
+                      : 'bg-bg-elevated/40 border-border-subtle text-zinc-400 hover:text-white'
+                  }`}
+                >
+                  {glow.replace('_', ' ')}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Background Mode & Particle Overlays */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-3 border-t border-border-subtle">
+            <div>
+              <label className="font-semibold text-zinc-300 block mb-2">Stage Background Mode</label>
+              <div className="grid grid-cols-2 gap-1.5">
+                {(['amoled', 'cover', 'blurred_cover', 'gradient'] as const).map((bg) => (
+                  <button
+                    key={bg}
+                    type="button"
+                    onClick={() => updateTheme({ backgroundMode: bg })}
+                    className={`py-1.5 text-center border clip-chamfer-sm capitalize text-[11px] ${
+                      (settings.theme.backgroundMode || 'blurred_cover') === bg
+                        ? 'bg-accent text-white border-accent'
+                        : 'bg-bg-elevated/40 border-border-subtle text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    {bg.replace('_', ' ')}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="font-semibold text-zinc-300 block mb-2">Particle & Texture Overlay</label>
+              <div className="grid grid-cols-3 gap-1.5">
+                {(
+                  ['none', 'rain', 'snow', 'dust', 'embers', 'stars', 'scanlines', 'grain', 'bokeh'] as const
+                ).map((ov) => (
+                  <button
+                    key={ov}
+                    type="button"
+                    onClick={() => updateTheme({ overlayEffect: ov })}
+                    className={`py-1.5 text-center border clip-chamfer-sm capitalize text-[11px] ${
+                      (settings.theme.overlayEffect || 'none') === ov
+                        ? 'bg-accent text-white border-accent'
+                        : 'bg-bg-elevated/40 border-border-subtle text-zinc-400 hover:text-white'
+                    }`}
+                  >
+                    {ov}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Camera Motion, Zoom & Chroma Mode */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-3 border-t border-border-subtle">
+            <div>
+              <label className="font-semibold text-zinc-300 block mb-1.5">Camera Motion</label>
+              <div className="flex gap-1">
+                {(['off', 'subtle', 'cinematic'] as const).map((mot) => (
+                  <button
+                    key={mot}
+                    type="button"
+                    onClick={() => updateTheme({ cameraMotion: mot })}
+                    className={`flex-1 py-1 text-center border clip-chamfer-sm capitalize text-[11px] ${
+                      (settings.theme.cameraMotion || 'subtle') === mot
+                        ? 'bg-accent text-white border-accent'
+                        : 'bg-bg-elevated/40 border-border-subtle text-zinc-400'
+                    }`}
+                  >
+                    {mot}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-zinc-300 mb-1">
+                <span className="font-semibold">Camera Zoom</span>
+                <span className="font-mono text-accent">{settings.theme.cameraZoom || 100}%</span>
+              </div>
+              <input
+                type="range"
+                min="50"
+                max="200"
+                step="5"
+                value={settings.theme.cameraZoom || 100}
+                onChange={(e) => updateTheme({ cameraZoom: parseInt(e.target.value, 10) })}
+                className="w-full h-1.5 accent-accent bg-white/10 rounded cursor-pointer mt-2"
+              />
+            </div>
+
+            <div className="flex flex-col justify-end">
+              <button
+                type="button"
+                onClick={() => updateTheme({ chromaMode: !settings.theme.chromaMode })}
+                className={`py-2 px-3 border clip-chamfer-sm font-semibold flex items-center justify-center gap-2 transition-all ${
+                  settings.theme.chromaMode
+                    ? 'bg-gradient-to-r from-red-500 via-green-500 to-blue-500 text-white border-white/40 shadow-lg'
+                    : 'bg-bg-elevated/40 border-border-subtle text-zinc-400 hover:text-white'
+                }`}
+              >
+                <span>🌈 Chroma Cycling Mode:</span>
+                <span className="font-mono">{settings.theme.chromaMode ? 'ON' : 'OFF'}</span>
               </button>
             </div>
           </div>

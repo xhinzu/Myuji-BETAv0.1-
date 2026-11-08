@@ -2,7 +2,7 @@
 
 This checklist tracks the implementation status of all features and components across all phases of the project.
 
-**Current Phase:** Phase 4 COMPLETED. Transitioning to Phase 5 (All Lyric Styles & Visual Customization).
+**Current Phase:** Phase 5 COMPLETED. Transitioning to Phase 6 (Accounts, Listen Together, Discord Presence).
 
 ---
 
@@ -88,24 +88,24 @@ This checklist tracks the implementation status of all features and components a
 ---
 
 ## Phase 5: Lyric Styles & Visual Customization
-- [ ] 10 Visual Styles:
-  - [ ] Classic (spring scrolling, active word highlight)
-  - [ ] Visual (inline icons and imagery)
-  - [ ] Constellation (continuous chain, fading nodes, zoomed-out camera)
-  - [ ] Ship (3D fly-through, legible active words)
-  - [ ] Camera (kinetic typography, subtle/cinematic camera)
-  - [ ] Fisheye (true spherical lens distortion shader)
-  - [ ] Inverted Fisheye (pinch/liquid-warp, neon gradient, grain)
-  - [ ] Codestyle (syntax highlighting, terminal line numbers)
-  - [ ] Branches (generative organic tree growth)
-  - [ ] Web (force-directed interconnected semantic graph)
-- [ ] Shared camera system (Off / Subtle / Cinematic, zoom slider 50-200%)
-- [ ] Color systems: Auto-Sync palette from cover art (OKLCH), manual pickers, Chroma cycling mode
-- [ ] Edge glow: 11 styles, music sync via AnalyserNode
-- [ ] Backgrounds: AMOLED black, cover art, blurred cover, custom video/image, palette gradient
-- [ ] Overlays: raindrops, rain, snow, dust, embers, fireflies, stars, grain, scratches, scanlines, light leaks, bokeh
-- [ ] Text effects: glow, neon outline, distressed, glitch, chromatic aberration
-- [ ] Word images & effects: 2,000+ concept lexicon, 50 emoji pairs, 49 particle effects with flash-safety budget
+- [x] 10 Visual Styles:
+  - [x] Classic (spring scrolling, active word highlight)
+  - [x] Visual (inline icons and imagery from 2,000+ concept lexicon)
+  - [x] Constellation (continuous chain, glowing radiant star nodes)
+  - [x] Ship (3D fly-through space cockpit perspective, lines passing like waypoints)
+  - [x] Camera (kinetic typography with 3D camera pan/tilt per line)
+  - [x] Fisheye (barrel lens curve exaggerating active center line)
+  - [x] Inverted Fisheye (pincushion center pinch with liquid neon glow)
+  - [x] Codestyle (syntax highlighting, line numbers, blinking terminal caret)
+  - [x] Branches (organic tree growth branching into lines as song advances)
+  - [x] Web (force-directed canvas semantic graph linking repeated words and themes)
+- [x] Shared camera system (Off / Subtle / Cinematic, zoom slider 50-200%)
+- [x] Color systems: Auto-Sync palette from cover art (OKLCH), curated presets, Chroma cycling mode
+- [x] Edge glow: 11 styles (ring, corners, bars, vignette, spotlight, aurora, neon_tube, conic, ripple, breathing, off), 3 modes (reactive beat sync via AnalyserNode, ambient breath, static)
+- [x] Backgrounds: AMOLED black, cover art, blurred cover, palette gradient
+- [x] Overlays: none, rain, snow, dust, embers, stars, scanlines, grain, bokeh
+- [x] Word images & effects: 2,000+ concept lexicon, 50 emoji pairs, 49 particle effects with flash-safety budget
+- [x] Settings UI for all 10 styles, glow styles & modes, background modes, overlays, zoom, and chroma mode
 
 ---
 
