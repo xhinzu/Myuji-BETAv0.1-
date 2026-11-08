@@ -21,3 +21,6 @@ tokio = { version = "1", features = ["full"] }
 rusqlite = { version = "0.32", features = ["bundled"] }
 reqwest = { version = "0.12", features = ["json", "stream"] }
 sha2 = "0.10"
+lofty = "0.21"
+notify = "8.0"
+walkdir = "2.5"

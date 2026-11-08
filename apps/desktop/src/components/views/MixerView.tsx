@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Sliders, Volume2, VolumeX, Disc, CloudRain, Flame, Trees } from 'lucide-react';
+import { AmbientEngine, AmbientTrackId } from '../../audio/AmbientEngine';
 
 interface AmbientSound {
-  id: string;
+  id: AmbientTrackId;
   name: string;
   file: string;
   category: string;
@@ -23,19 +24,31 @@ const AMBIENT_SOUNDS: AmbientSound[] = [
 
 export const MixerView: React.FC = () => {
   const [volumes, setVolumes] = useState<Record<string, number>>({});
+  const engine = AmbientEngine.getInstance();
 
-  const handleVolumeChange = (id: string, val: number) => {
+  const handleVolumeChange = (id: AmbientTrackId, val: number) => {
     setVolumes((prev) => ({ ...prev, [id]: val }));
+    engine.setChannelVolume(id, val);
   };
 
   const applyPreset = (preset: 'cozy' | 'storm' | 'forest') => {
+    let presetVols: Partial<Record<AmbientTrackId, number>> = {};
     if (preset === 'cozy') {
-      setVolumes({ fireplace: 0.6, rain: 0.35, chatter: 0.2 });
+      presetVols = { fireplace: 0.6, rain: 0.35, chatter: 0.2 };
     } else if (preset === 'storm') {
-      setVolumes({ rain: 0.75, thunder: 0.5, wind: 0.4 });
+      presetVols = { rain: 0.75, thunder: 0.5, wind: 0.4 };
     } else if (preset === 'forest') {
-      setVolumes({ birds: 0.6, wind: 0.3, crickets: 0.25 });
+      presetVols = { birds: 0.6, wind: 0.3, crickets: 0.25 };
     }
+
+    engine.stopAll();
+    const next: Record<string, number> = {};
+    for (const [id, vol] of Object.entries(presetVols)) {
+      const trackId = id as AmbientTrackId;
+      next[trackId] = vol!;
+      engine.setChannelVolume(trackId, vol!);
+    }
+    setVolumes(next);
   };
 
   return (

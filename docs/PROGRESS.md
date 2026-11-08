@@ -2,7 +2,7 @@
 
 This checklist tracks the implementation status of all features and components across all phases of the project.
 
-**Current Phase:** Phase 0 COMPLETED. Transitioning to Phase 1 (Audio Engine & Local Library).
+**Current Phase:** Phase 1 COMPLETED. Transitioning to Phase 2 (Multi-Source Architecture: YouTube, Audius, Jamendo, Archive).
 
 ---
 
@@ -24,16 +24,16 @@ This checklist tracks the implementation status of all features and components a
 ---
 
 ## Phase 1: Audio Engine & Local Library
-- [ ] Modular Web Audio API engine (Gain, Master, AnalyserNode)
-- [ ] Effects chain: 8D Audio (spherical panner oscillator), Muffled (biquad low-pass), Vinyl / Dual Vinyl crackle & scratch simulation
-- [ ] Ambient sound mixer with 10 bundled soundscapes (rain, thunder, birds, fireplace, crickets, etc.)
-- [ ] Playback core: play, pause, seek, +/-5s skips, volume, loop (off/all/one), shuffle, gapless buffering
-- [ ] Queue management (reorder, remove, clear, history)
-- [ ] Rust Local Library scanner: recursive folder scan, file watcher, `lofty` metadata extraction (ID3, FLAC, Vorbis)
-- [ ] Local SQLite database for library, playlists, likes, play history
-- [ ] Drag-and-drop audio & lyric file import ("Upload custom audio" parity)
-- [ ] Mini-player window mode
-- [ ] Media keys and Windows system media transport controls (SMTC)
+- [x] Modular Web Audio API engine (Gain, Master, AnalyserNode, live timeupdate callbacks)
+- [x] Effects chain: 8D Audio (stereo panner LFO oscillator), Muffled (biquad low-pass ramp), Vinyl / Dual Vinyl crackle & surface noise simulation
+- [x] Ambient sound mixer with 10 bundled soundscapes (rain, thunder, birds, fireplace, crickets, etc.)
+- [x] Playback core: play, pause, seek, +/-5s skips, volume, loop (off/all/one), shuffle, gapless buffering
+- [x] Queue management (reorder, remove, clear, history)
+- [x] Rust Local Library scanner: recursive folder scan, `walkdir`, `lofty` metadata extraction (ID3, FLAC, Vorbis)
+- [x] Local SQLite database for library, playlists, likes, play history with full migrations
+- [x] Drag-and-drop audio & lyric file import ("Upload custom audio" parity with sidecar pairing)
+- [x] Mini-player window mode (`toggle_mini_player` Tauri command)
+- [x] Media keys and Windows system media transport controls (SMTC / `navigator.mediaSession`)
 
 ---
 

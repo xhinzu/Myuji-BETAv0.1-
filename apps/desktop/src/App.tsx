@@ -15,9 +15,11 @@ import { DiscoverView } from './components/views/DiscoverView';
 import { MixerView } from './components/views/MixerView';
 import { RoomsView } from './components/views/RoomsView';
 import { SettingsView } from './components/views/SettingsView';
+import { useMediaSession } from './hooks/useMediaSession';
 import { X } from 'lucide-react';
 
 export const App: React.FC = () => {
+  useMediaSession();
   const { activeTab, setActiveTab } = useNavigationStore();
   const { isPlaying, togglePlay } = usePlayerStore();
   const { settings } = useSettingsStore();
