@@ -18,3 +18,4 @@ if exist "F:\vbcode\releases\MyuJiku.exe" (
 
 echo Executable not found. Launching via pnpm...
 pnpm desktop:tauri
+
