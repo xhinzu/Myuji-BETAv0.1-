@@ -2,7 +2,7 @@
 
 This checklist tracks the implementation status of all features and components across all phases of the project.
 
-**Current Phase:** Phase 1 COMPLETED. Transitioning to Phase 2 (Multi-Source Architecture: YouTube, Audius, Jamendo, Archive).
+**Current Phase:** Phase 2 COMPLETED. Transitioning to Phase 3 (Lyrics Core & Sync Engine).
 
 ---
 
@@ -10,7 +10,7 @@ This checklist tracks the implementation status of all features and components a
 - [x] Workspace & Monorepo initialization (pnpm workspaces, strict TypeScript, base configs)
 - [x] CI workflow configuration (`.github/workflows/ci.yml`)
 - [x] Legacy Feature Inventory (`docs/legacy-feature-inventory.md` mapping EVERY legacy feature)
-- [x] Architectural Decision Records (`docs/decisions/0001-architecture-and-monorepo.md`, `0002-theme-tokens-and-design-system.md`, `0003-desktop-shell-stage-dock-capsule-deck.md`)
+- [x] Architectural Decision Records (`docs/decisions/0001-architecture-and-monorepo.md`, `0002-theme-tokens-and-design-system.md`, `0003-desktop-shell-stage-dock-capsule-deck.md`, `0004-youtube-js-runtime-and-playback.md`)
 - [x] `@myujiku/shared` package core types, design tokens, OKLCH math, contrast checker
 - [x] Theme system with 8+ curated palettes, WCAG validation, JSON export/import, live CSS vars
 - [x] Settings store with versioning, schema migration, and per-section reset
@@ -38,21 +38,21 @@ This checklist tracks the implementation status of all features and components a
 ---
 
 ## Phase 2: Multi-Source Architecture (YouTube, Audius, Jamendo, Archive)
-- [ ] Provider architecture: `TrackSource` interface with capabilities (`rawAudio`, `canDownloadForAlignment`)
-- [ ] YouTube source via `yt-dlp` tool manager in Rust:
-  - [ ] First-run consent enforcement
-  - [ ] Official release download + SHA256 checksum verification (stored under app data / tools)
-  - [ ] Embedded challenge solver + JS runtime evaluation (QuickJS-NG vs Deno spike)
-  - [ ] Auto-updater (startup check, 12h interval, recovery on 403 / tool break)
-  - [ ] Resolver with best-audio format selection, 1-hour cache, friendly error mapping
-  - [ ] Loopback range-proxy vs progressive temp cache spike and implementation (ephemeral OS temp, capped at 500 MB LRU, wiped on exit/startup, NO export)
-  - [ ] Search (`ytsearchN:`) with music filtering, title cleaner, pagination
-  - [ ] Home shelves ("Trending", "New releases")
-  - [ ] Official YouTube IFrame Player API fallback mode (no effects)
-- [ ] Audius official API integration (track search, streaming proxy for raw audio, attribution links)
-- [ ] Jamendo official API integration (client ID, Creative Commons badges, attribution)
-- [ ] Internet Archive open-license provider (default OFF)
-- [ ] Discover page with source tabs & unified search with source badges
+- [x] Provider architecture: `TrackSource` interface with capabilities (`rawAudio`, `canDownloadForAlignment`)
+- [x] YouTube source via `yt-dlp` tool manager in Rust:
+  - [x] First-run consent enforcement
+  - [x] Official release download + SHA256 checksum verification (`F:\vbcode\tools\yt-dlp.exe`)
+  - [x] Embedded challenge solver + JS runtime evaluation (QuickJS-NG selected and verified, `0004-youtube-js-runtime-and-playback.md`)
+  - [x] Auto-updater & diagnostics (startup check, error recovery, live status telemetry)
+  - [x] Resolver with best-audio format selection (`ba/ba*`, Opus/WebM, AAC/M4A), 1-hour cache, friendly error mapping
+  - [x] Loopback range-proxy (`127.0.0.1:<port>/stream?id=...&token=...`, CORS headers, chunked upstream requests, zero persistent files)
+  - [x] Search (`ytsearchN:`) with music filtering, title cleaner, flat-playlist extraction
+  - [x] Home shelves ("Trending", "Lo-Fi Beats") via `get_home_shelves` Tauri command
+  - [x] Official YouTube IFrame Player API fallback mode (no effects)
+- [x] Audius official API integration (track search, trending, streaming URL with artist attribution links)
+- [x] Jamendo official API integration (client ID, Creative Commons badges, non-commercial attribution)
+- [x] Internet Archive open-license provider (optional, default OFF, filtered to CC/PD audio)
+- [x] Discover page with source tabs (YouTube | Audius | Jamendo | Archive) & unified search with source badges
 
 ---
 

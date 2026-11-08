@@ -1,13 +1,30 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   X,
   Activity,
   Copy,
   Check,
+  PlayCircle,
+  Loader2,
+  Wrench,
 } from 'lucide-react';
+import { invoke } from '@tauri-apps/api/core';
 import { useNavigationStore } from '../../stores/navigationStore';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useSettingsStore } from '../../stores/settingsStore';
+
+interface TauriToolStatus {
+  installed: boolean;
+  yt_dlp_path?: string | null;
+  yt_dlp_version?: string | null;
+  channel: string;
+  js_runtime?: string | null;
+  js_runtime_path?: string | null;
+  last_updated?: number | null;
+  last_error?: string | null;
+}
+
+const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
 export const InspectModal: React.FC = () => {
   const { isInspectModalOpen, setInspectModalOpen } = useNavigationStore();
@@ -16,12 +33,28 @@ export const InspectModal: React.FC = () => {
 
   const [fps, setFps] = useState<number>(60);
   const [copied, setCopied] = useState<boolean>(false);
+  const [toolStatus, setToolStatus] = useState<TauriToolStatus | null>(null);
+  const [isTestingVideo, setIsTestingVideo] = useState(false);
+  const [testResult, setTestResult] = useState<string | null>(null);
+
   const frameCountRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(performance.now());
 
-  // Live FPS measurement loop
+  const fetchToolStatus = useCallback(async () => {
+    if (!isTauri) return;
+    try {
+      const status = await invoke<TauriToolStatus>('get_ytdlp_status');
+      setToolStatus(status);
+    } catch (e) {
+      console.warn('Failed to fetch tool status:', e);
+    }
+  }, []);
+
+  // Live FPS measurement loop & Tool status
   useEffect(() => {
     if (!isInspectModalOpen) return;
+
+    fetchToolStatus();
 
     let animId: number;
     const updateFps = (now: number) => {
@@ -37,9 +70,32 @@ export const InspectModal: React.FC = () => {
 
     animId = requestAnimationFrame(updateFps);
     return () => cancelAnimationFrame(animId);
-  }, [isInspectModalOpen]);
+  }, [isInspectModalOpen, fetchToolStatus]);
 
   if (!isInspectModalOpen) return null;
+
+  const handleTestVideo = async () => {
+    setIsTestingVideo(true);
+    setTestResult('Resolving test stream via yt-dlp & loopback proxy...');
+    try {
+      if (isTauri) {
+        const res = await invoke<{ stream_url: string; title: string; duration: number }>(
+          'resolve_youtube_stream',
+          { videoId: 'dQw4w9WgXcQ' }
+        );
+        setTestResult(
+          `Success! "${res.title}" (${Math.round(res.duration)}s) resolved via ${res.stream_url}`
+        );
+      } else {
+        setTestResult('Video test requires the native desktop app runtime.');
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setTestResult(`Test failed: ${msg}`);
+    } finally {
+      setIsTestingVideo(false);
+    }
+  };
 
   const diagnosticsData = {
     app: {
@@ -47,6 +103,14 @@ export const InspectModal: React.FC = () => {
       version: '2.0.0',
       timestamp: new Date().toISOString(),
       fps,
+    },
+    tools: {
+      installed: toolStatus?.installed ?? false,
+      version: toolStatus?.yt_dlp_version ?? 'Unknown',
+      channel: toolStatus?.channel ?? 'stable',
+      jsRuntime: toolStatus?.js_runtime ?? 'None',
+      jsRuntimePath: toolStatus?.js_runtime_path ?? 'None',
+      lastError: toolStatus?.last_error ?? null,
     },
     player: {
       hasTrack: !!player.currentTrack,
@@ -77,11 +141,6 @@ export const InspectModal: React.FC = () => {
       tempCacheCapMb: settings.tempCacheCapMb,
       officialEmbedFallback: settings.officialEmbedFallback,
     },
-    aligner: {
-      mode: settings.alignerMode,
-      model: settings.selectedAlignerModel,
-      separateVocals: settings.separateVocalsForAlignment,
-    },
   };
 
   const handleCopyDiagnostics = () => {
@@ -110,11 +169,25 @@ export const InspectModal: React.FC = () => {
                 MyuJiku System & Diagnostics Inspector
               </h2>
               <span className="text-[10px] text-zinc-400 font-mono">
-                Real-time performance and engine state
+                Real-time performance, yt-dlp resolver & engine telemetry
               </span>
             </div>
           </div>
           <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={handleTestVideo}
+              disabled={isTestingVideo}
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-bg-elevated hover:bg-white/10 border border-border-subtle clip-chamfer-sm text-zinc-300 hover:text-white transition-colors"
+            >
+              {isTestingVideo ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-accent" />
+              ) : (
+                <PlayCircle className="w-3.5 h-3.5 text-rose-400" />
+              )}
+              <span>Test with a video</span>
+            </button>
+
             <button
               type="button"
               onClick={handleCopyDiagnostics}
@@ -131,6 +204,32 @@ export const InspectModal: React.FC = () => {
               <X className="w-5 h-5" />
             </button>
           </div>
+        </div>
+
+        {/* Video Test Result Banner */}
+        {testResult && (
+          <div className="p-2.5 bg-bg-elevated border border-accent/40 rounded text-xs font-mono text-zinc-200 flex items-center justify-between">
+            <span className="truncate">{testResult}</span>
+            <button
+              onClick={() => setTestResult(null)}
+              className="text-zinc-500 hover:text-white ml-2 text-xs"
+            >
+              ✕
+            </button>
+          </div>
+        )}
+
+        {/* Tool Info Strip */}
+        <div className="p-3 bg-bg-surface/80 border border-border-subtle clip-chamfer-sm flex items-center justify-between text-xs font-mono">
+          <div className="flex items-center gap-2 text-zinc-300">
+            <Wrench className="w-4 h-4 text-accent" />
+            <span>yt-dlp: {toolStatus?.yt_dlp_version || 'Not Detected'}</span>
+            <span className="text-zinc-600">|</span>
+            <span>Channel: {toolStatus?.channel || 'stable'}</span>
+            <span className="text-zinc-600">|</span>
+            <span>JS: {toolStatus?.js_runtime || 'None'}</span>
+          </div>
+          <span className="text-zinc-500 text-[11px]">Cache: 500 MB (LRU)</span>
         </div>
 
         {/* Live Metrics Grid */}

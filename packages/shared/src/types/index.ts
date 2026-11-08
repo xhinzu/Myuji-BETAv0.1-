@@ -319,6 +319,8 @@ export interface AppSettings {
   discordPresenceEnabled: boolean;
   discordHideSongDetails: boolean;
   discordApplicationId: string;
+  archiveProviderEnabled?: boolean;
+  jamendoClientId?: string;
   lastVolume: number;
   isMuted: boolean;
 }

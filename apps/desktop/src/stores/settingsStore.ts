@@ -28,6 +28,8 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   discordPresenceEnabled: false,
   discordHideSongDetails: false,
   discordApplicationId: '1567903090177343499',
+  archiveProviderEnabled: false,
+  jamendoClientId: '56d30c08',
   lastVolume: 0.8,
   isMuted: false,
 };

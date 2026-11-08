@@ -1,10 +1,15 @@
 pub mod db;
 pub mod library;
+pub mod youtube;
 
 use db::{Database, DbTrack};
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
 use tauri::State;
+use youtube::{
+    search_youtube, LoopbackProxy, StreamResolver, ToolManager, ToolStatus,
+    YouTubeTrack,
+};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct AppStatus {
@@ -13,8 +18,21 @@ pub struct AppStatus {
     pub status: String,
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ResolvedAudioResult {
+    pub stream_url: String,
+    pub title: String,
+    pub artist: String,
+    pub duration: f64,
+    pub thumbnail: Option<String>,
+    pub format_id: String,
+}
+
 pub struct AppState {
     pub db: Arc<Mutex<Database>>,
+    pub tool_manager: Arc<ToolManager>,
+    pub resolver: Arc<StreamResolver>,
+    pub proxy: Arc<Mutex<Option<LoopbackProxy>>>,
 }
 
 pub mod commands {
@@ -35,13 +53,75 @@ pub mod commands {
     }
 
     #[tauri::command]
-    pub fn check_ytdlp_status() -> serde_json::Value {
-        serde_json::json!({
-            "installed": false,
-            "version": null,
-            "channel": "stable",
-            "cache_cap_mb": 500,
+    pub fn get_ytdlp_status(state: State<'_, AppState>) -> ToolStatus {
+        state.tool_manager.get_status()
+    }
+
+    #[tauri::command]
+    pub fn check_ytdlp_status(state: State<'_, AppState>) -> ToolStatus {
+        state.tool_manager.get_status()
+    }
+
+    #[tauri::command]
+    pub async fn resolve_youtube_stream(
+        state: State<'_, AppState>,
+        video_id: String,
+    ) -> Result<ResolvedAudioResult, String> {
+        let tool_path = state.tool_manager.get_yt_dlp_path();
+        let qjs_path = state.tool_manager.get_qjs_path();
+
+        let resolved = state
+            .resolver
+            .resolve_audio(&video_id, &tool_path, Some(&qjs_path))?;
+
+        // Ensure loopback proxy is running
+        let proxy_url = {
+            let mut proxy_lock = state.proxy.lock().map_err(|e| e.to_string())?;
+            if proxy_lock.is_none() {
+                let new_proxy = LoopbackProxy::start(
+                    state.resolver.clone(),
+                    state.tool_manager.clone(),
+                )?;
+                *proxy_lock = Some(new_proxy);
+            }
+            let proxy_ref = proxy_lock.as_ref().unwrap();
+            proxy_ref.build_stream_url(&video_id)
+        };
+
+        Ok(ResolvedAudioResult {
+            stream_url: proxy_url,
+            title: resolved.title,
+            artist: resolved.artist,
+            duration: resolved.duration,
+            thumbnail: resolved.thumbnail,
+            format_id: resolved.format_id,
         })
+    }
+
+    #[tauri::command]
+    pub async fn search_youtube_tracks(
+        state: State<'_, AppState>,
+        query: String,
+        limit: Option<usize>,
+    ) -> Result<Vec<YouTubeTrack>, String> {
+        let tool_path = state.tool_manager.get_yt_dlp_path();
+        let max_results = limit.unwrap_or(15);
+        search_youtube(&query, max_results, &tool_path)
+    }
+
+    #[tauri::command]
+    pub async fn get_home_shelves(
+        state: State<'_, AppState>,
+    ) -> Result<serde_json::Value, String> {
+        let tool_path = state.tool_manager.get_yt_dlp_path();
+        
+        let trending = search_youtube("top music hits 2026", 8, &tool_path).unwrap_or_default();
+        let lofi_chill = search_youtube("chill lofi hip hop official audio", 8, &tool_path).unwrap_or_default();
+
+        Ok(serde_json::json!({
+            "trending": trending,
+            "lofi": lofi_chill
+        }))
     }
 
     #[tauri::command]
@@ -118,8 +198,23 @@ pub fn run() {
         Err(_) => Database::open_in_memory().expect("failed to open in-memory database"),
     };
 
+    let tool_manager = Arc::new(ToolManager::new());
+    let resolver = Arc::new(StreamResolver::new());
+    
+    // Start loopback range-proxy
+    let proxy = match LoopbackProxy::start(resolver.clone(), tool_manager.clone()) {
+        Ok(p) => Some(p),
+        Err(e) => {
+            eprintln!("Failed to start loopback proxy on startup: {}", e);
+            None
+        }
+    };
+
     let app_state = AppState {
         db: Arc::new(Mutex::new(db)),
+        tool_manager,
+        resolver,
+        proxy: Arc::new(Mutex::new(proxy)),
     };
 
     tauri::Builder::default()
@@ -128,7 +223,11 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             commands::get_app_status,
             commands::greet,
+            commands::get_ytdlp_status,
             commands::check_ytdlp_status,
+            commands::resolve_youtube_stream,
+            commands::search_youtube_tracks,
+            commands::get_home_shelves,
             commands::scan_local_folder,
             commands::get_library_tracks,
             commands::search_library,

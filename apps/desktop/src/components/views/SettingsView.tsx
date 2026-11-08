@@ -335,6 +335,19 @@ export const SettingsView: React.FC = () => {
               className="w-4 h-4 accent-accent"
             />
           </div>
+
+          <div className="flex items-center justify-between pt-3 border-t border-border-subtle">
+            <div>
+              <p className="font-semibold text-white">Internet Archive Provider (Optional)</p>
+              <p className="text-zinc-400 mt-0.5">Enables searching open-license historical audio & live concerts</p>
+            </div>
+            <input
+              type="checkbox"
+              checked={settings.archiveProviderEnabled ?? false}
+              onChange={(e) => updateSettings({ archiveProviderEnabled: e.target.checked })}
+              className="w-4 h-4 accent-accent"
+            />
+          </div>
         </div>
       </section>
 
