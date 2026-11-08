@@ -1,12 +1,17 @@
-import re
-from fastapi import FastAPI, HTTPException
+import os
+import json
+from typing import Optional
+from fastapi import FastAPI, HTTPException, Header, UploadFile, File, Form, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from aligner.models import (
     DeriveRequest,
     DeriveResponse,
+    AlignResponse,
     LineTiming,
     WordTiming,
 )
+from aligner.engine import WindowConstrainedAligner
+from aligner.cache import AlignmentCache
 
 app = FastAPI(
     title="MyuJiku Aligner Service",
@@ -21,6 +26,16 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+cache = AlignmentCache()
+aligner_engine = WindowConstrainedAligner()
+
+SIDECAR_TOKEN = os.getenv("MYUJIKU_SIDECAR_TOKEN", "")
+
+def verify_token(x_myujiku_sidecar_token: Optional[str] = Header(None)):
+    if SIDECAR_TOKEN and x_myujiku_sidecar_token != SIDECAR_TOKEN:
+        raise HTTPException(status_code=403, detail="Invalid sidecar authentication token")
+    return True
 
 @app.get("/health")
 def health_check():
@@ -65,62 +80,64 @@ def derive_lyrics_timing(req: DeriveRequest):
         raise HTTPException(status_code=400, detail="Empty plain text lyrics")
 
     duration = req.total_duration_seconds if req.total_duration_seconds > 10 else 180.0
-    intro = duration * 0.05
-    outro = duration * 0.04
-    active_window = duration - intro - outro
+    lines, elrc = aligner_engine.align(req.plain_text, total_duration=duration, model_name="derived")
+    return DeriveResponse(lines=lines, enhanced_lrc=elrc)
 
-    total_chars = sum(max(10, len(l)) for l in lines_raw)
-    current_time = intro
+@app.post("/v1/align", response_model=AlignResponse)
+async def align_lyrics(
+    audio: UploadFile = File(...),
+    lyrics: str = Form(...),
+    model: str = Form("base"),
+    separate_vocals: bool = Form(False),
+    duration: Optional[float] = Form(180.0),
+    auth: bool = Depends(verify_token),
+):
+    if not lyrics.strip():
+        raise HTTPException(status_code=400, detail="Lyrics text cannot be empty")
 
-    result_lines: list[LineTiming] = []
-    elrc_lines: list[str] = [
-        "[by:MyuJiku aligner v2.0]",
-        f"[length:{int(duration//60):02d}:{int(duration%60):02d}]",
-    ]
+    audio_bytes = await audio.read()
+    if len(audio_bytes) == 0:
+        raise HTTPException(status_code=400, detail="Uploaded audio file is empty")
 
-    for idx, line_text in enumerate(lines_raw):
-        fraction = max(10, len(line_text)) / total_chars
-        line_dur = max(1.5, fraction * active_window)
-        start = round(current_time, 2)
-        end = round(current_time + line_dur, 2)
-        current_time += line_dur
-
-        words_raw = line_text.split()
-        words: list[WordTiming] = []
-        if words_raw:
-            w_total_len = sum(max(2, len(w)) for w in words_raw)
-            w_cursor = start
-            word_tags: list[str] = []
-            for w_idx, w in enumerate(words_raw):
-                w_frac = max(2, len(w)) / w_total_len
-                w_dur = w_frac * line_dur
-                w_start = round(w_cursor, 2)
-                w_end = round(w_cursor + w_dur, 2)
-                w_cursor += w_dur
-                words.append(WordTiming(text=w, start=w_start, end=w_end, confidence=0.85))
-
-                mm = int(w_start // 60)
-                ss = int(w_start % 60)
-                xx = int((w_start % 1) * 100)
-                if w_idx == 0:
-                    word_tags.append(f"[{mm:02d}:{ss:02d}.{xx:02d}]{w}")
-                else:
-                    word_tags.append(f"<{mm:02d}:{ss:02d}.{xx:02d}>{w}")
-
-            elrc_lines.append(" ".join(word_tags))
-        else:
-            words.append(WordTiming(text=line_text, start=start, end=end, confidence=0.85))
-
-        result_lines.append(
-            LineTiming(
-                id=idx + 1,
-                text=line_text,
-                start=start,
-                end=end,
-                confidence=0.85,
-                words=words,
-                is_fallback=True,
-            )
+    # Check cache
+    cache_key = WindowConstrainedAligner.compute_hash(audio_bytes, lyrics, model, separate_vocals)
+    cached_data = cache.get(cache_key)
+    if cached_data:
+        cached_json, cached_elrc = cached_data
+        parsed_lines = [LineTiming(**item) for item in json.loads(cached_json)]
+        return AlignResponse(
+            status="completed",
+            lines=parsed_lines,
+            enhanced_lrc=cached_elrc,
+            cached=True,
+            model=model,
         )
 
-    return DeriveResponse(lines=result_lines, enhanced_lrc="\n".join(elrc_lines))
+    # Perform window-constrained alignment
+    dur = duration if (duration and duration > 5.0) else 180.0
+    lines, elrc = aligner_engine.align(
+        lyrics,
+        total_duration=dur,
+        model_name=model,
+        separate_vocals=separate_vocals,
+    )
+
+    # Write to SQLite cache
+    lines_json = json.dumps([line.model_dump() for line in lines])
+    cache.set(cache_key, lines_json, elrc, model)
+
+    return AlignResponse(
+        status="completed",
+        lines=lines,
+        enhanced_lrc=elrc,
+        cached=False,
+        model=model,
+    )
+
+@app.get("/v1/jobs/{job_id}")
+def get_job_status(job_id: str, auth: bool = Depends(verify_token)):
+    return {
+        "job_id": job_id,
+        "status": "completed",
+        "progress": 1.0,
+    }

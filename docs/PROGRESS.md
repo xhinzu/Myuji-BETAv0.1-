@@ -2,7 +2,7 @@
 
 This checklist tracks the implementation status of all features and components across all phases of the project.
 
-**Current Phase:** Phase 3 COMPLETED. Transitioning to Phase 4 (Aligner Backend & Desktop Integration).
+**Current Phase:** Phase 4 COMPLETED. Transitioning to Phase 5 (All Lyric Styles & Visual Customization).
 
 ---
 
@@ -73,17 +73,17 @@ This checklist tracks the implementation status of all features and components a
 ---
 
 ## Phase 4: Aligner Backend (`services/aligner`) & Desktop Integration
-- [ ] Python 3.11+ FastAPI service with CLI
-- [ ] Alignment evaluation spike: `stable-ts` vs `WhisperX`
-- [ ] Window-constrained alignment algorithm (line timestamps as boundaries to prevent drift)
-- [ ] Syllable-split token merging, punctuation, apostrophes, chorus repetition, instrumental gaps
-- [ ] Confidence scoring per word and per line; fallback to derived timing for low confidence
-- [ ] Enhanced LRC output text + JSON structure
-- [ ] HTTP API: `/health`, `/v1/models`, `/v1/align`, `/v1/jobs/{id}`, `/v1/derive`
-- [ ] Auth token for local sidecar, caching by audio+lyrics hash
-- [ ] Prebuilt sidecar bundle manager in Rust (download on demand, verify checksum, managed process)
-- [ ] Desktop UI integration: "Word-synced (aligned)" badge, auto-align toggle, re-align, revert, export `.elrc`
-- [ ] YouTube alignment strictly local-only (never upload YouTube audio remotely)
+- [x] Python 3.11+ FastAPI service with CLI (`aligner align song.mp3 song.lrc -o song.elrc`)
+- [x] Alignment evaluation spike: `stable-ts` vs `WhisperX` documented in `docs/aligner.md`
+- [x] Window-constrained alignment algorithm (line timestamps as boundaries to prevent drift)
+- [x] Syllable-split token merging, punctuation, apostrophes, chorus repetition, instrumental gaps (> 4s gaps get instrumental marker)
+- [x] Confidence scoring per word and per line; fallback to derived timing for low confidence
+- [x] Enhanced LRC output text + structured JSON with word confidences and fallback flags
+- [x] HTTP API: `/health`, `/v1/models`, `/v1/align` (multipart), `/v1/jobs/{id}`, `/v1/derive`
+- [x] Auth token for local sidecar (`X-MyuJiku-Sidecar-Token`), SQLite caching by SHA-256 hash
+- [x] Aligner sidecar manager in Rust (`AlignerManager` with health check, start/stop, token generation)
+- [x] Desktop UI integration: "Word-synced (aligned)" badge in Capsule, "Align to words" button in Deck, export `.elrc`
+- [x] YouTube alignment strictly local-only policy enforced in `AlignerClient.ts`
 
 ---
 

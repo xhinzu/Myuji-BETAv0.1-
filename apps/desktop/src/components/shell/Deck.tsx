@@ -10,6 +10,9 @@ import {
   FileText,
   Sparkles,
   Layers,
+  Cpu,
+  Download,
+  Loader2,
 } from 'lucide-react';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useNavigationStore } from '../../stores/navigationStore';
@@ -18,7 +21,9 @@ import {
   sliderValueToSpeed,
   DEFAULT_SPEED,
   DEFAULT_OFFSET,
+  writeEnhancedLrc,
 } from '@myujiku/shared';
+import { AlignerClient } from '../../aligner/AlignerClient';
 
 export const Deck: React.FC = () => {
   const {
@@ -40,9 +45,12 @@ export const Deck: React.FC = () => {
     toggleEffect,
     lyricTransform,
     setLyricTransform,
+    setActiveLyrics,
   } = usePlayerStore();
 
   const [activeDeckTab, setActiveDeckTab] = useState<'queue' | 'sync' | 'effects'>('sync');
+  const [isAligning, setIsAligning] = useState(false);
+  const [alignStatus, setAlignStatus] = useState<string | null>(null);
 
   if (!isDeckOpen) return null;
 
@@ -85,6 +93,46 @@ export const Deck: React.FC = () => {
     lyricsDuration > 0 &&
     Math.abs(lyricsDuration - currentTrack.duration) > 5;
   const durationDiffSeconds = currentTrack ? Math.round(lyricsDuration - currentTrack.duration) : 0;
+
+  const handleAlignWithWhisper = async () => {
+    if (!currentTrack || activeLyrics.length === 0) return;
+    setIsAligning(true);
+    setAlignStatus('Aligning words via Whisper...');
+    try {
+      const rawLrc = activeLyrics.map((l) => {
+        const m = Math.floor(l.start / 60);
+        const s = Math.floor(l.start % 60);
+        const ms = Math.floor((l.start % 1) * 100);
+        return `[${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}.${ms.toString().padStart(2, '0')}] ${l.text}`;
+      }).join('\n');
+
+      const result = await AlignerClient.getInstance().alignTrack(currentTrack, rawLrc);
+      setActiveLyrics(result.lines);
+      setAlignStatus(result.cached ? 'Loaded from cache!' : 'Alignment complete!');
+      setTimeout(() => setAlignStatus(null), 3000);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setAlignStatus(`Alignment error: ${msg}`);
+    } finally {
+      setIsAligning(false);
+    }
+  };
+
+  const handleExportElrc = () => {
+    if (activeLyrics.length === 0) return;
+    const content = writeEnhancedLrc(activeLyrics, {
+      title: currentTrack?.title,
+      artist: currentTrack?.artist,
+      lengthSeconds: currentTrack?.duration,
+    });
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${currentTrack?.title || 'lyrics'}.elrc`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div
@@ -285,6 +333,41 @@ export const Deck: React.FC = () => {
             >
               <Layers className="w-3.5 h-3.5" />
               <span>Mini HUD</span>
+            </button>
+          </div>
+
+          {/* Alignment Status Banner */}
+          {alignStatus && (
+            <div className="p-2 bg-accent/15 border border-accent/40 rounded text-xs text-accent flex items-center justify-between">
+              <span>{alignStatus}</span>
+              <button onClick={() => setAlignStatus(null)} className="text-zinc-500 hover:text-white">✕</button>
+            </div>
+          )}
+
+          {/* Aligner Trigger & ELRC Export */}
+          <div className="pt-1 flex items-center justify-between">
+            <button
+              type="button"
+              onClick={handleAlignWithWhisper}
+              disabled={isAligning || activeLyrics.length === 0}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-500 disabled:opacity-40 text-white text-xs font-bold uppercase tracking-wider clip-chamfer-sm transition-all shadow-[0_0_10px_rgba(168,85,247,0.4)]"
+            >
+              {isAligning ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Cpu className="w-3.5 h-3.5" />
+              )}
+              <span>{isAligning ? 'Aligning...' : 'Align to Words'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleExportElrc}
+              disabled={activeLyrics.length === 0}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-bg-elevated hover:bg-white/10 border border-border-subtle clip-chamfer-sm text-xs text-zinc-300 hover:text-white"
+            >
+              <Download className="w-3.5 h-3.5" />
+              <span>Export .elrc</span>
             </button>
           </div>
         </div>

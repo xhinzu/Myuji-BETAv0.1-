@@ -52,3 +52,6 @@ pnpm-debug.log*
 *.dll
 *.pdb
 *.msi
+*.db
+*.sqlite
+

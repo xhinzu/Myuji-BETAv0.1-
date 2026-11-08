@@ -32,11 +32,13 @@ export const Capsule: React.FC = () => {
     isMuted,
     setVolume,
     toggleMute,
+    activeLyrics,
   } = usePlayerStore();
 
   const { isDeckOpen, toggleDeck } = useNavigationStore();
 
   const progressPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+  const hasWordSync = activeLyrics.some((l) => l.words && l.words.length > 1);
 
   return (
     <div
@@ -62,9 +64,16 @@ export const Capsule: React.FC = () => {
             )}
           </div>
           <div className="min-w-0">
-            <p className="text-xs font-semibold text-white truncate">
-              {currentTrack?.title || 'No track loaded'}
-            </p>
+            <div className="flex items-center gap-1.5 min-w-0">
+              <p className="text-xs font-semibold text-white truncate">
+                {currentTrack?.title || 'No track loaded'}
+              </p>
+              {hasWordSync && (
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-purple-500/20 border border-purple-500/40 text-purple-300 font-mono flex-shrink-0">
+                  Word-synced
+                </span>
+              )}
+            </div>
             <p className="text-[11px] text-zinc-400 truncate">
               {currentTrack?.artist || 'Ready to play'}
             </p>

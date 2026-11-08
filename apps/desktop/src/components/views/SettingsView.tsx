@@ -417,6 +417,63 @@ export const SettingsView: React.FC = () => {
               <option value="small">Small (Highest precision)</option>
             </select>
           </div>
+
+          <div className="flex items-center justify-between pt-3 border-t border-border-subtle">
+            <div>
+              <p className="font-semibold text-white">Separate Vocals First (Demucs, slower)</p>
+              <p className="text-zinc-400 mt-0.5">Isolates vocal stem before alignment for cleaner results on loud mixes</p>
+            </div>
+            <input
+              type="checkbox"
+              checked={settings.separateVocalsForAlignment}
+              onChange={(e) => updateSettings({ separateVocalsForAlignment: e.target.checked })}
+              className="w-4 h-4 accent-accent"
+            />
+          </div>
+
+          {settings.alignerMode === 'remote' && (
+            <div className="space-y-3 pt-3 border-t border-border-subtle">
+              <div>
+                <label className="text-xs font-semibold text-zinc-300 block mb-1">Remote Aligner URL</label>
+                <input
+                  type="text"
+                  value={settings.alignerRemoteUrl || ''}
+                  onChange={(e) => updateSettings({ alignerRemoteUrl: e.target.value })}
+                  placeholder="https://aligner.example.com"
+                  className="w-full px-2.5 py-1 text-xs bg-black border border-border-subtle clip-chamfer-sm text-white font-mono"
+                />
+              </div>
+              <div>
+                <label className="text-xs font-semibold text-zinc-300 block mb-1">API Key / Token (Optional)</label>
+                <input
+                  type="password"
+                  value={settings.alignerApiKey || ''}
+                  onChange={(e) => updateSettings({ alignerApiKey: e.target.value })}
+                  placeholder="X-MyuJiku-Sidecar-Token"
+                  className="w-full px-2.5 py-1 text-xs bg-black border border-border-subtle clip-chamfer-sm text-white font-mono"
+                />
+              </div>
+            </div>
+          )}
+
+          <div className="pt-3 border-t border-border-subtle flex items-center justify-between">
+            <span className="text-[11px] text-zinc-400">
+              {settings.alignerMode === 'off'
+                ? 'Alignment engine is currently disabled.'
+                : `Engine running in ${settings.alignerMode} mode.`}
+            </span>
+            <button
+              type="button"
+              onClick={async () => {
+                const { AlignerClient } = await import('../../aligner/AlignerClient');
+                const isHealthy = await AlignerClient.getInstance().checkHealth();
+                alert(isHealthy ? 'Aligner connection test SUCCESSFUL! (Service healthy)' : 'Could not reach aligner service at endpoint.');
+              }}
+              className="px-3 py-1.5 bg-bg-elevated hover:bg-white/10 border border-border-subtle clip-chamfer-sm text-xs text-accent font-semibold"
+            >
+              Test Aligner Connection
+            </button>
+          </div>
         </div>
       </section>
 

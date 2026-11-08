@@ -35,3 +35,10 @@ class DeriveRequest(BaseModel):
 class DeriveResponse(BaseModel):
     lines: List[LineTiming]
     enhanced_lrc: str
+
+class AlignResponse(BaseModel):
+    status: str = "completed"
+    lines: List[LineTiming]
+    enhanced_lrc: str
+    cached: bool = False
+    model: str

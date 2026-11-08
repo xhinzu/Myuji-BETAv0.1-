@@ -1,7 +1,9 @@
+pub mod aligner_manager;
 pub mod db;
 pub mod library;
 pub mod youtube;
 
+use aligner_manager::{AlignerManager, AlignerStatus};
 use db::{Database, DbTrack};
 use serde::{Deserialize, Serialize};
 use std::sync::{Arc, Mutex};
@@ -33,6 +35,7 @@ pub struct AppState {
     pub tool_manager: Arc<ToolManager>,
     pub resolver: Arc<StreamResolver>,
     pub proxy: Arc<Mutex<Option<LoopbackProxy>>>,
+    pub aligner_manager: Arc<AlignerManager>,
 }
 
 pub mod commands {
@@ -170,6 +173,30 @@ pub mod commands {
     }
 
     #[tauri::command]
+    pub async fn check_aligner_health(state: State<'_, AppState>) -> Result<bool, String> {
+        state.aligner_manager.check_health()
+    }
+
+    #[tauri::command]
+    pub async fn start_aligner_sidecar(state: State<'_, AppState>) -> Result<AlignerStatus, String> {
+        state.aligner_manager.start()?;
+        let running = state.aligner_manager.is_running();
+        Ok(AlignerStatus {
+            running,
+            port: state.aligner_manager.get_port(),
+            token: state.aligner_manager.get_token().to_string(),
+            model: "base".to_string(),
+            last_error: None,
+        })
+    }
+
+    #[tauri::command]
+    pub async fn stop_aligner_sidecar(state: State<'_, AppState>) -> Result<(), String> {
+        state.aligner_manager.stop();
+        Ok(())
+    }
+
+    #[tauri::command]
     pub async fn toggle_mini_player(window: tauri::Window, is_mini: bool) -> Result<(), String> {
         use tauri::{LogicalSize, Size};
         if is_mini {
@@ -200,6 +227,7 @@ pub fn run() {
 
     let tool_manager = Arc::new(ToolManager::new());
     let resolver = Arc::new(StreamResolver::new());
+    let aligner_manager = Arc::new(AlignerManager::new());
     
     // Start loopback range-proxy
     let proxy = match LoopbackProxy::start(resolver.clone(), tool_manager.clone()) {
@@ -215,6 +243,7 @@ pub fn run() {
         tool_manager,
         resolver,
         proxy: Arc::new(Mutex::new(proxy)),
+        aligner_manager,
     };
 
     tauri::Builder::default()
@@ -234,6 +263,9 @@ pub fn run() {
             commands::toggle_like,
             commands::get_liked_tracks,
             commands::add_play_history,
+            commands::check_aligner_health,
+            commands::start_aligner_sidecar,
+            commands::stop_aligner_sidecar,
             commands::toggle_mini_player
         ])
         .run(tauri::generate_context!())
