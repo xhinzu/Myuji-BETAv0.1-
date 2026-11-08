@@ -27,6 +27,26 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all"
+    "targets": ["nsis"],
+    "icon": [
+      "icons/icon.ico"
+    ],
+    "fileAssociations": [
+      {
+        "ext": ["lrc", "elrc"],
+        "name": "Synced Lyrics File",
+        "description": "Synchronized word-level lyrics for MyuJiku"
+      },
+      {
+        "ext": ["mp3", "flac", "wav", "ogg", "m4a", "opus"],
+        "name": "Audio Track",
+        "description": "Audio file for MyuJiku"
+      }
+    ],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    }
   }
 }

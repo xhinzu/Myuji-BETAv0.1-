@@ -7,11 +7,13 @@ import {
   PlayCircle,
   Loader2,
   Wrench,
+  FileText,
 } from 'lucide-react';
 import { invoke } from '@tauri-apps/api/core';
 import { useNavigationStore } from '../../stores/navigationStore';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useSettingsStore } from '../../stores/settingsStore';
+import { Logger, LogEntry } from '../../utils/Logger';
 
 interface TauriToolStatus {
   installed: boolean;
@@ -36,6 +38,14 @@ export const InspectModal: React.FC = () => {
   const [toolStatus, setToolStatus] = useState<TauriToolStatus | null>(null);
   const [isTestingVideo, setIsTestingVideo] = useState(false);
   const [testResult, setTestResult] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'diagnostics' | 'logs'>('diagnostics');
+  const [logsList, setLogsList] = useState<LogEntry[]>([]);
+
+  useEffect(() => {
+    if (activeTab === 'logs') {
+      setLogsList(Logger.getLogs());
+    }
+  }, [activeTab]);
 
   const frameCountRef = useRef<number>(0);
   const lastTimeRef = useRef<number>(performance.now());
@@ -190,6 +200,19 @@ export const InspectModal: React.FC = () => {
 
             <button
               type="button"
+              onClick={() => setActiveTab(activeTab === 'diagnostics' ? 'logs' : 'diagnostics')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs border clip-chamfer-sm transition-colors ${
+                activeTab === 'logs'
+                  ? 'bg-accent text-white border-accent'
+                  : 'bg-bg-elevated hover:bg-white/10 border border-border-subtle text-zinc-300'
+              }`}
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span>{activeTab === 'logs' ? 'Show Diagnostics' : 'View Logs'}</span>
+            </button>
+
+            <button
+              type="button"
               onClick={handleCopyDiagnostics}
               className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-bg-elevated hover:bg-white/10 border border-border-subtle clip-chamfer-sm text-zinc-300 hover:text-white transition-colors"
             >
@@ -258,9 +281,49 @@ export const InspectModal: React.FC = () => {
           </div>
         </div>
 
-        {/* JSON / Diagnostics Details Viewer */}
+        {/* Main Content Viewer: Logs or Diagnostics JSON */}
         <div className="flex-1 overflow-y-auto bg-black/60 border border-border-subtle clip-chamfer-sm p-3 font-mono text-[11px] text-zinc-300">
-          <pre className="whitespace-pre-wrap">{JSON.stringify(diagnosticsData, null, 2)}</pre>
+          {activeTab === 'logs' ? (
+            <div className="space-y-1">
+              <div className="flex items-center justify-between pb-2 mb-2 border-b border-border-subtle text-xs text-zinc-400">
+                <span>Recent System Logs ({logsList.length})</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    Logger.clear();
+                    setLogsList([]);
+                  }}
+                  className="text-[10px] text-rose-400 hover:underline"
+                >
+                  Clear Logs
+                </button>
+              </div>
+              {logsList.length === 0 ? (
+                <p className="text-zinc-500 italic">No logs recorded yet.</p>
+              ) : (
+                logsList.map((l, i) => (
+                  <div key={i} className="flex items-start gap-2 leading-relaxed">
+                    <span className="text-zinc-500 select-none">{l.timestamp}</span>
+                    <span
+                      className={`font-bold select-none ${
+                        l.level === 'ERROR'
+                          ? 'text-rose-400'
+                          : l.level === 'WARN'
+                          ? 'text-amber-400'
+                          : 'text-accent'
+                      }`}
+                    >
+                      [{l.level}]
+                    </span>
+                    <span className="text-zinc-400 select-none">[{l.category}]</span>
+                    <span className="text-white">{l.message}</span>
+                  </div>
+                ))
+              )}
+            </div>
+          ) : (
+            <pre className="whitespace-pre-wrap">{JSON.stringify(diagnosticsData, null, 2)}</pre>
+          )}
         </div>
       </div>
     </div>

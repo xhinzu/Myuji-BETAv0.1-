@@ -15,6 +15,7 @@ import { EditLyricsModal } from './components/lyrics/EditLyricsModal';
 import { MiniLyricsHud } from './components/lyrics/MiniLyricsHud';
 import { AccountModal } from './components/modals/AccountModal';
 import { ListenTogetherModal } from './components/modals/ListenTogetherModal';
+import { HelpModal } from './components/modals/HelpModal';
 import { LibraryView } from './components/views/LibraryView';
 import { DiscoverView } from './components/views/DiscoverView';
 import { MixerView } from './components/views/MixerView';
@@ -41,6 +42,8 @@ export const App: React.FC = () => {
     setAccountModalOpen,
     isListenTogetherModalOpen,
     setListenTogetherModalOpen,
+    isHelpModalOpen,
+    setHelpModalOpen,
   } = useNavigationStore();
   const { currentTrack, isPlaying, togglePlay, activeLyrics, setActiveLyrics } = usePlayerStore();
   const { settings } = useSettingsStore();
@@ -127,11 +130,17 @@ export const App: React.FC = () => {
       if (e.code === 'Space') {
         e.preventDefault();
         togglePlay();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+        e.preventDefault();
+        setHelpModalOpen(true);
+      } else if (e.key === '?' && !e.ctrlKey && !e.metaKey) {
+        e.preventDefault();
+        setHelpModalOpen(true);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [togglePlay]);
+  }, [togglePlay, setHelpModalOpen]);
 
   return (
     <div
@@ -211,6 +220,10 @@ export const App: React.FC = () => {
       <ListenTogetherModal
         isOpen={isListenTogetherModalOpen}
         onClose={() => setListenTogetherModalOpen(false)}
+      />
+      <HelpModal
+        isOpen={isHelpModalOpen}
+        onClose={() => setHelpModalOpen(false)}
       />
     </div>
   );

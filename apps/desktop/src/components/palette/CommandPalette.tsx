@@ -16,6 +16,7 @@ import {
   FileText,
   ShieldCheck,
   Download,
+  HelpCircle,
 } from 'lucide-react';
 import { useNavigationStore } from '../../stores/navigationStore';
 import { usePlayerStore } from '../../stores/playerStore';
@@ -40,6 +41,7 @@ export const CommandPalette: React.FC = () => {
     setOnboardingOpen,
     setAccountModalOpen,
     setListenTogetherModalOpen,
+    setHelpModalOpen,
   } = useNavigationStore();
 
   const { isPlaying, togglePlay, skipNext, skipPrev, toggleEffect } = usePlayerStore();
@@ -130,6 +132,13 @@ export const CommandPalette: React.FC = () => {
       category: 'Social',
       icon: <Users className="w-4 h-4" />,
       action: () => { setListenTogetherModalOpen(true); setCommandPaletteOpen(false); },
+    },
+    {
+      id: 'open-help',
+      title: 'Keyboard Shortcuts & Accessibility Guide (Ctrl+/)',
+      category: 'System',
+      icon: <HelpCircle className="w-4 h-4" />,
+      action: () => { setHelpModalOpen(true); setCommandPaletteOpen(false); },
     },
 
     // Playback
