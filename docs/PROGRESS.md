@@ -2,7 +2,7 @@
 
 This checklist tracks the implementation status of all features and components across all phases of the project.
 
-**Current Phase:** Phase 5 COMPLETED. Transitioning to Phase 6 (Accounts, Listen Together, Discord Presence).
+**Current Phase:** Phase 6 COMPLETED. Transitioning to Phase 7 (Desktop Polish, Docs, Installer & Parity Matrix).
 
 ---
 
@@ -110,11 +110,11 @@ This checklist tracks the implementation status of all features and components a
 ---
 
 ## Phase 6: Accounts, Listen Together & Discord Presence
-- [ ] Supabase Auth: Discord OAuth & Email/Password with PKCE flow & `myujiku://` deep link
-- [ ] Listen Together rooms: 6-char code, share link, shared queue, skip voting, chat & reactions
-- [ ] P2P drift-correction clock sync (resolving audio independently on each client; no audio relayed)
-- [ ] Discord Rich Presence: native Rust Discord RPC, "Listening to MyuJiku", artwork, progress timestamps, privacy toggle
-- [ ] "Now Playing" webhook and "Copy custom status"
+- [x] Supabase Auth: Discord OAuth & Email/Password with PKCE flow & `myujiku://` deep link (account optional, 100% usable signed-out)
+- [x] Listen Together rooms: 6-char code, share link, shared queue, skip voting, chat & reactions
+- [x] P2P drift-correction clock sync (<50ms, resolving audio independently on each client; no audio relayed)
+- [x] Discord Rich Presence: native Rust Discord RPC client (App ID `1567903090177343499`), "Listening to MyuJiku", artwork, progress timestamps, privacy toggle
+- [x] "Now Playing" webhook and "Copy custom status" helper
 
 ---
 

@@ -25,7 +25,7 @@ import { exportThemeJson } from '@myujiku/shared';
 interface PaletteCommand {
   id: string;
   title: string;
-  category: 'Navigation' | 'Playback' | 'Audio Effects' | 'Appearance' | 'System';
+  category: 'Navigation' | 'Playback' | 'Audio Effects' | 'Appearance' | 'System' | 'Account' | 'Social';
   icon: React.ReactNode;
   action: () => void;
 }
@@ -38,6 +38,8 @@ export const CommandPalette: React.FC = () => {
     setInspectModalOpen,
     setCreditsModalOpen,
     setOnboardingOpen,
+    setAccountModalOpen,
+    setListenTogetherModalOpen,
   } = useNavigationStore();
 
   const { isPlaying, togglePlay, skipNext, skipPrev, toggleEffect } = usePlayerStore();
@@ -114,6 +116,20 @@ export const CommandPalette: React.FC = () => {
       category: 'Navigation',
       icon: <Settings className="w-4 h-4" />,
       action: () => { setActiveTab('settings'); setCommandPaletteOpen(false); },
+    },
+    {
+      id: 'open-account',
+      title: 'Account & Profile (Discord / Email Sign In)',
+      category: 'Account',
+      icon: <Users className="w-4 h-4" />,
+      action: () => { setAccountModalOpen(true); setCommandPaletteOpen(false); },
+    },
+    {
+      id: 'open-listen-together',
+      title: 'Listen Together Room (Host or Join)',
+      category: 'Social',
+      icon: <Users className="w-4 h-4" />,
+      action: () => { setListenTogetherModalOpen(true); setCommandPaletteOpen(false); },
     },
 
     // Playback

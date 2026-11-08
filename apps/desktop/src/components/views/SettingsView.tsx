@@ -679,12 +679,12 @@ export const SettingsView: React.FC = () => {
         </div>
       </section>
 
-      {/* 4. Discord Rich Presence */}
+      {/* 4. Discord Rich Presence & Integrations */}
       <section className="space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-indigo-400">
             <Tv className="w-4 h-4" />
-            <h2 className="text-sm font-bold uppercase tracking-wider text-white">Discord Rich Presence</h2>
+            <h2 className="text-sm font-bold uppercase tracking-wider text-white">Discord Rich Presence & Webhook</h2>
           </div>
         </div>
 
@@ -692,7 +692,9 @@ export const SettingsView: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="font-semibold text-white">Show "Listening to MyuJiku" in Discord</p>
-              <p className="text-zinc-400 mt-0.5">Connects automatically to local Discord desktop client via native IPC</p>
+              <p className="text-zinc-400 mt-0.5">
+                Application ID: <span className="font-mono text-indigo-400">{settings.discordApplicationId || '1567903090177343499'}</span>
+              </p>
             </div>
             <input
               type="checkbox"
@@ -713,6 +715,44 @@ export const SettingsView: React.FC = () => {
               onChange={(e) => updateSettings({ discordHideSongDetails: e.target.checked })}
               className="w-4 h-4 accent-accent"
             />
+          </div>
+
+          {/* Webhook & Custom Status Helpers */}
+          <div className="pt-3 border-t border-border-subtle space-y-3">
+            <div>
+              <label className="font-semibold text-white block mb-1">Discord "Now Playing" Webhook URL (Optional)</label>
+              <input
+                type="text"
+                placeholder="https://discord.com/api/webhooks/..."
+                className="w-full px-2.5 py-1.5 text-xs bg-black border border-border-subtle clip-chamfer-sm text-white font-mono placeholder-zinc-600 focus:outline-none focus:border-indigo-400"
+              />
+            </div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] text-zinc-400">
+                Fallback if Discord RPC is disabled: copy status to clipboard
+              </span>
+              <button
+                type="button"
+                onClick={async () => {
+                  const { DiscordClient } = await import('../../discord/DiscordClient');
+                  const text = DiscordClient.getInstance().formatCustomStatus({
+                    id: 'sample',
+                    source: 'youtube',
+                    sourceId: 'sample',
+                    title: 'Current Song',
+                    artist: 'MyuJiku Artist',
+                    duration: 210,
+                    capabilities: { rawAudio: true, canDownloadForAlignment: true },
+                  });
+                  navigator.clipboard.writeText(text);
+                  alert(`Copied custom status to clipboard:\n${text}`);
+                }}
+                className="px-3 py-1.5 bg-bg-elevated hover:bg-white/10 border border-border-subtle clip-chamfer-sm text-xs text-indigo-300 font-semibold"
+              >
+                Copy Custom Status
+              </button>
+            </div>
           </div>
         </div>
       </section>

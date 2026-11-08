@@ -13,6 +13,8 @@ import { CreditsModal } from './components/credits/CreditsModal';
 import { WrongLyricsModal } from './components/lyrics/WrongLyricsModal';
 import { EditLyricsModal } from './components/lyrics/EditLyricsModal';
 import { MiniLyricsHud } from './components/lyrics/MiniLyricsHud';
+import { AccountModal } from './components/modals/AccountModal';
+import { ListenTogetherModal } from './components/modals/ListenTogetherModal';
 import { LibraryView } from './components/views/LibraryView';
 import { DiscoverView } from './components/views/DiscoverView';
 import { MixerView } from './components/views/MixerView';
@@ -20,6 +22,8 @@ import { RoomsView } from './components/views/RoomsView';
 import { SettingsView } from './components/views/SettingsView';
 import { useMediaSession } from './hooks/useMediaSession';
 import { LyricsManager } from './lyrics/LyricsManager';
+import { DiscordClient } from './discord/DiscordClient';
+import { useRoomStore } from './stores/roomStore';
 import { X } from 'lucide-react';
 
 export const App: React.FC = () => {
@@ -33,12 +37,42 @@ export const App: React.FC = () => {
     setEditLyricsModalOpen,
     isMiniLyricsHudOpen,
     setMiniLyricsHudOpen,
+    isAccountModalOpen,
+    setAccountModalOpen,
+    isListenTogetherModalOpen,
+    setListenTogetherModalOpen,
   } = useNavigationStore();
   const { currentTrack, isPlaying, togglePlay, activeLyrics, setActiveLyrics } = usePlayerStore();
   const { settings } = useSettingsStore();
+  const { roomCode } = useRoomStore();
 
   const [isChromeVisible, setIsChromeVisible] = useState(true);
   const hideTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Sync Discord Rich Presence on track/play change
+  useEffect(() => {
+    if (!settings.discordPresenceEnabled) {
+      DiscordClient.getInstance().clearActivity();
+      return;
+    }
+
+    if (currentTrack && isPlaying) {
+      DiscordClient.getInstance().setActivity(
+        currentTrack,
+        0,
+        roomCode || undefined,
+        settings.discordHideSongDetails
+      );
+    } else {
+      DiscordClient.getInstance().clearActivity();
+    }
+  }, [
+    currentTrack,
+    isPlaying,
+    roomCode,
+    settings.discordPresenceEnabled,
+    settings.discordHideSongDetails,
+  ]);
 
   // Auto-fetch lyrics from LRCLIB when track changes and no lyrics are loaded
   useEffect(() => {
@@ -169,6 +203,14 @@ export const App: React.FC = () => {
       <MiniLyricsHud
         isOpen={isMiniLyricsHudOpen}
         onClose={() => setMiniLyricsHudOpen(false)}
+      />
+      <AccountModal
+        isOpen={isAccountModalOpen}
+        onClose={() => setAccountModalOpen(false)}
+      />
+      <ListenTogetherModal
+        isOpen={isListenTogetherModalOpen}
+        onClose={() => setListenTogetherModalOpen(false)}
       />
     </div>
   );

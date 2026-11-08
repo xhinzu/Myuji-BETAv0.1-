@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@myujiku/shared": "workspace:*",
+    "@supabase/supabase-js": "^2.119.0",
     "@tauri-apps/api": "^2.2.0",
     "@tauri-apps/plugin-shell": "^2.2.0",
     "clsx": "^2.1.1",

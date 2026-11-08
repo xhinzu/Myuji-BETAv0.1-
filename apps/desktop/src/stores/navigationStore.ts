@@ -14,6 +14,8 @@ interface NavigationStoreState {
   isWrongLyricsModalOpen: boolean;
   isEditLyricsModalOpen: boolean;
   isMiniLyricsHudOpen: boolean;
+  isAccountModalOpen: boolean;
+  isListenTogetherModalOpen: boolean;
 
   setActiveTab: (tab: NavTab) => void;
   toggleDockExpanded: () => void;
@@ -28,6 +30,8 @@ interface NavigationStoreState {
   setWrongLyricsModalOpen: (open: boolean) => void;
   setEditLyricsModalOpen: (open: boolean) => void;
   setMiniLyricsHudOpen: (open: boolean) => void;
+  setAccountModalOpen: (open: boolean) => void;
+  setListenTogetherModalOpen: (open: boolean) => void;
 }
 
 export const useNavigationStore = create<NavigationStoreState>((set) => ({
@@ -42,6 +46,8 @@ export const useNavigationStore = create<NavigationStoreState>((set) => ({
   isWrongLyricsModalOpen: false,
   isEditLyricsModalOpen: false,
   isMiniLyricsHudOpen: false,
+  isAccountModalOpen: false,
+  isListenTogetherModalOpen: false,
 
   setActiveTab: (tab) => set({ activeTab: tab }),
   toggleDockExpanded: () => set((state) => ({ isDockExpanded: !state.isDockExpanded })),
@@ -56,4 +62,6 @@ export const useNavigationStore = create<NavigationStoreState>((set) => ({
   setWrongLyricsModalOpen: (open) => set({ isWrongLyricsModalOpen: open }),
   setEditLyricsModalOpen: (open) => set({ isEditLyricsModalOpen: open }),
   setMiniLyricsHudOpen: (open) => set({ isMiniLyricsHudOpen: open }),
+  setAccountModalOpen: (open) => set({ isAccountModalOpen: open }),
+  setListenTogetherModalOpen: (open) => set({ isListenTogetherModalOpen: open }),
 }));
