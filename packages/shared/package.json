@@ -1,0 +1,17 @@
+{
+  "name": "@myujiku/shared",
+  "version": "2.0.0",
+  "description": "Framework-free shared core for MyuJiku v2 (parsers, sync math, normalizers, lexicon, themes)",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "vitest": "^3.0.4"
+  }
+}

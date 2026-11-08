@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build artifacts
+dist/
+build/
+target/
+**/target/
+src-tauri/target/
+**/src-tauri/target/
+.tauri/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+
+# Legacy reference folder (READ-ONLY, not committed)
+/legacy/
+legacy/
+
+# Secrets and environment variables
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# OS and Editor files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+
+# Binaries and logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+*.exe
+*.dll
+*.pdb
+*.msi

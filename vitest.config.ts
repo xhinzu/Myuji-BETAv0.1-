@@ -1,0 +1,8 @@
+import { defineConfig } from 'vitest/config';
+
+export default defineConfig({
+  test: {
+    exclude: ['legacy/**', '**/node_modules/**', 'dist/**', '**/dist/**'],
+    globals: true,
+  },
+});

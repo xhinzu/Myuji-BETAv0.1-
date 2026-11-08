@@ -1,0 +1,69 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg-base: #000000;
+  --color-bg-surface: rgba(18, 18, 18, 0.75);
+  --color-bg-elevated: rgba(28, 28, 28, 0.85);
+  --color-border-base: rgba(255, 255, 255, 0.12);
+  --color-border-subtle: rgba(255, 255, 255, 0.05);
+  --color-text-primary: #ffffff;
+  --color-text-secondary: #a1a1aa;
+  --color-text-muted: #71717a;
+  --color-accent: oklch(65.0% 0.220 295.0);
+  --color-accent-hover: oklch(73.0% 0.220 295.0);
+  --color-accent-active: oklch(57.0% 0.220 295.0);
+  --color-accent-glow: oklch(65.0% 0.220 295.0 / 0.40);
+  --color-lyric-active: #ffffff;
+  --color-lyric-inactive: rgba(255, 255, 255, 0.35);
+  --color-lyric-highlight: oklch(65.0% 0.220 295.0);
+  --radius-base: 0px;
+  --clip-chamfer: polygon(10px 0, 100% 0, 100% calc(100% - 10px), calc(100% - 10px) 100%, 0 100%, 0 10px);
+  --spacing-density: 1;
+  --ui-scale: 1;
+  --blur-surface: 16px;
+  --anim-speed: 1s;
+  --font-ui: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--color-bg-base);
+  color: var(--color-text-primary);
+  font-family: var(--font-ui);
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* Chamfer polygon clip utility */
+.clip-chamfer {
+  clip-path: var(--clip-chamfer);
+}
+
+.clip-chamfer-sm {
+  clip-path: polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+
+/* Custom discreet scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
