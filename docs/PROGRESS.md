@@ -2,7 +2,7 @@
 
 This checklist tracks the implementation status of all features and components across all phases of the project.
 
-**Current Phase:** Phase 2 COMPLETED. Transitioning to Phase 3 (Lyrics Core & Sync Engine).
+**Current Phase:** Phase 3 COMPLETED. Transitioning to Phase 4 (Aligner Backend & Desktop Integration).
 
 ---
 
@@ -57,17 +57,18 @@ This checklist tracks the implementation status of all features and components a
 ---
 
 ## Phase 3: Lyrics Core & Sync Engine
-- [ ] `@myujiku/shared` parsers: standard LRC, Enhanced LRC (mid-word tags, A2 form, CRLF/BOM, out-of-order markers), plain text
-- [ ] Derived character-weighted word timing fallback
-- [ ] Enhanced LRC writer (round-trip verified)
-- [ ] Providers: LRCLIB API client with duration tolerance & ranking, sidecar `.lrc`/`.elrc` reader, embedded tags, local cache
-- [ ] "Find on Lyricsify" browser helper (no scraping)
-- [ ] Live sync engine: `requestAnimationFrame` clock reader, linear transform (`lyricTime = speed * t + offset`)
-- [ ] Speed slider (tiny, translucent, log scale 0.5x-2x, double-click reset)
-- [ ] Offset control, tap-to-sync, "Shift lyrics by N s", duration-mismatch warning banner
-- [ ] Auto-scroll with 4s pause after manual scroll
-- [ ] Add/Edit lyrics dialog (paste, upload, format detection, ALL-CAPS fix toggle)
-- [ ] Floating mini-lyrics widget
+- [x] `@myujiku/shared` parsers: standard LRC, Enhanced LRC (mid-word tags, A2 form, CRLF/BOM, out-of-order markers), plain text
+- [x] Derived character-weighted word timing fallback with punctuation weighting
+- [x] Enhanced LRC writer (round-trip verified)
+- [x] Providers: LRCLIB API client with duration tolerance & ranking, sidecar `.lrc`/`.elrc` reader, embedded tags, local cache
+- [x] "Find on Lyricsify" browser helper (no scraping, native shell link)
+- [x] Live sync engine: `requestAnimationFrame` clock reader, linear transform (`lyricTime = speed * t + offset`)
+- [x] Speed slider (tiny, translucent, log scale 0.5x-2x, double-click reset)
+- [x] Offset control, tap-to-sync, "Shift lyrics by N s", duration-mismatch warning banner, keyboard nudge (`[` and `]`)
+- [x] Auto-scroll with 4s pause after manual scroll
+- [x] Add/Edit lyrics dialog (`EditLyricsModal` with live syntax check, ALL-CAPS fix preserving lexicon proper nouns)
+- [x] Manual "Wrong lyrics?" search and pick dialog (`WrongLyricsModal`)
+- [x] Floating mini-lyrics widget (`MiniLyricsHud`, draggable anywhere on desktop)
 
 ---
 

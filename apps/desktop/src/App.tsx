@@ -10,22 +10,50 @@ import { CommandPalette } from './components/palette/CommandPalette';
 import { YouTubeConsentModal } from './components/onboarding/YouTubeConsentModal';
 import { InspectModal } from './components/inspect/InspectModal';
 import { CreditsModal } from './components/credits/CreditsModal';
+import { WrongLyricsModal } from './components/lyrics/WrongLyricsModal';
+import { EditLyricsModal } from './components/lyrics/EditLyricsModal';
+import { MiniLyricsHud } from './components/lyrics/MiniLyricsHud';
 import { LibraryView } from './components/views/LibraryView';
 import { DiscoverView } from './components/views/DiscoverView';
 import { MixerView } from './components/views/MixerView';
 import { RoomsView } from './components/views/RoomsView';
 import { SettingsView } from './components/views/SettingsView';
 import { useMediaSession } from './hooks/useMediaSession';
+import { LyricsManager } from './lyrics/LyricsManager';
 import { X } from 'lucide-react';
 
 export const App: React.FC = () => {
   useMediaSession();
-  const { activeTab, setActiveTab } = useNavigationStore();
-  const { isPlaying, togglePlay } = usePlayerStore();
+  const {
+    activeTab,
+    setActiveTab,
+    isWrongLyricsModalOpen,
+    setWrongLyricsModalOpen,
+    isEditLyricsModalOpen,
+    setEditLyricsModalOpen,
+    isMiniLyricsHudOpen,
+    setMiniLyricsHudOpen,
+  } = useNavigationStore();
+  const { currentTrack, isPlaying, togglePlay, activeLyrics, setActiveLyrics } = usePlayerStore();
   const { settings } = useSettingsStore();
 
   const [isChromeVisible, setIsChromeVisible] = useState(true);
   const hideTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-fetch lyrics from LRCLIB when track changes and no lyrics are loaded
+  useEffect(() => {
+    if (!currentTrack) return;
+    if (activeLyrics.length > 0) return;
+
+    LyricsManager.getInstance()
+      .fetchLyricsForTrack(currentTrack)
+      .then((res) => {
+        if (res && res.parsedResult.lines.length > 0) {
+          setActiveLyrics(res.parsedResult.lines);
+        }
+      })
+      .catch((err) => console.warn('Auto-fetch lyrics error:', err));
+  }, [currentTrack, activeLyrics.length, setActiveLyrics]);
 
   // Auto-hide floating chrome after 3.5s inactivity during playback
   const handleUserActivity = () => {
@@ -130,6 +158,18 @@ export const App: React.FC = () => {
       <YouTubeConsentModal />
       <InspectModal />
       <CreditsModal />
+      <WrongLyricsModal
+        isOpen={isWrongLyricsModalOpen}
+        onClose={() => setWrongLyricsModalOpen(false)}
+      />
+      <EditLyricsModal
+        isOpen={isEditLyricsModalOpen}
+        onClose={() => setEditLyricsModalOpen(false)}
+      />
+      <MiniLyricsHud
+        isOpen={isMiniLyricsHudOpen}
+        onClose={() => setMiniLyricsHudOpen(false)}
+      />
     </div>
   );
 };

@@ -5,6 +5,11 @@ import {
   Gauge,
   SlidersHorizontal,
   RotateCcw,
+  AlertTriangle,
+  Crosshair,
+  FileText,
+  Sparkles,
+  Layers,
 } from 'lucide-react';
 import { usePlayerStore } from '../../stores/playerStore';
 import { useNavigationStore } from '../../stores/navigationStore';
@@ -16,8 +21,18 @@ import {
 } from '@myujiku/shared';
 
 export const Deck: React.FC = () => {
-  const { isDeckOpen, setDeckOpen } = useNavigationStore();
   const {
+    isDeckOpen,
+    setDeckOpen,
+    setWrongLyricsModalOpen,
+    setEditLyricsModalOpen,
+    setMiniLyricsHudOpen,
+  } = useNavigationStore();
+  const {
+    currentTrack,
+    currentTime,
+    activeLyrics,
+    activeLineIndex,
     queue,
     clearQueue,
     removeFromQueue,
@@ -51,6 +66,25 @@ export const Deck: React.FC = () => {
   const handleResetOffset = () => {
     setLyricTransform({ offset: DEFAULT_OFFSET });
   };
+
+  // Tap-to-sync: align current line start to currentTime
+  const handleTapToSync = () => {
+    const activeLine = activeLyrics[activeLineIndex] || activeLyrics[0];
+    if (activeLine) {
+      const calculatedOffset = Number((activeLine.start - lyricTransform.speed * currentTime).toFixed(2));
+      setLyricTransform({ offset: calculatedOffset });
+    }
+  };
+
+  // Check duration mismatch
+  const lastLine = activeLyrics[activeLyrics.length - 1];
+  const lyricsDuration = lastLine ? lastLine.end : 0;
+  const hasDurationMismatch =
+    currentTrack &&
+    currentTrack.duration > 0 &&
+    lyricsDuration > 0 &&
+    Math.abs(lyricsDuration - currentTrack.duration) > 5;
+  const durationDiffSeconds = currentTrack ? Math.round(lyricsDuration - currentTrack.duration) : 0;
 
   return (
     <div
@@ -114,6 +148,25 @@ export const Deck: React.FC = () => {
       {/* Tab Content: Lyrics Sync Calibration */}
       {activeDeckTab === 'sync' && (
         <div className="space-y-4">
+          {/* Duration mismatch alert banner */}
+          {hasDurationMismatch && (
+            <div className="p-2.5 bg-amber-500/15 border border-amber-500/40 clip-chamfer-sm flex items-center justify-between text-xs text-amber-200">
+              <div className="flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-amber-400 flex-shrink-0" />
+                <span>
+                  Lyrics length differs by {durationDiffSeconds > 0 ? `+${durationDiffSeconds}` : durationDiffSeconds}s from audio.
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setWrongLyricsModalOpen(true)}
+                className="px-2 py-0.5 bg-amber-500/20 hover:bg-amber-500/30 border border-amber-500/50 text-white rounded text-[11px] font-semibold"
+              >
+                Pick Version
+              </button>
+            </div>
+          )}
+
           <div>
             <div className="flex items-center justify-between text-xs text-zinc-300 mb-1.5">
               <span className="font-medium">Lyric Speed Transform</span>
@@ -148,48 +201,91 @@ export const Deck: React.FC = () => {
 
           <div>
             <div className="flex items-center justify-between text-xs text-zinc-300 mb-1.5">
-              <span className="font-medium">Manual Offset</span>
+              <div className="flex items-center gap-2">
+                <span className="font-medium">Manual Offset</span>
+                <span className="text-[10px] text-zinc-500 font-mono">([ and ] to nudge)</span>
+              </div>
               <span className="text-[11px] font-mono text-zinc-400">
                 {lyricTransform.offset >= 0 ? `+${lyricTransform.offset.toFixed(2)}` : lyricTransform.offset.toFixed(2)}s
               </span>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => handleAdjustOffset(-1.0)}
+                className="px-2 py-1 text-xs bg-bg-elevated hover:bg-white/10 border border-border-subtle clip-chamfer-sm text-zinc-300"
+              >
+                -1.0s
+              </button>
               <button
                 type="button"
                 onClick={() => handleAdjustOffset(-0.5)}
-                className="px-2.5 py-1 text-xs bg-bg-elevated hover:bg-white/10 border border-border-subtle clip-chamfer-sm text-zinc-300"
+                className="px-2 py-1 text-xs bg-bg-elevated hover:bg-white/10 border border-border-subtle clip-chamfer-sm text-zinc-300"
               >
                 -0.5s
               </button>
               <button
                 type="button"
-                onClick={() => handleAdjustOffset(-0.1)}
-                className="px-2.5 py-1 text-xs bg-bg-elevated hover:bg-white/10 border border-border-subtle clip-chamfer-sm text-zinc-300"
+                onClick={handleTapToSync}
+                className="flex-1 py-1 text-xs bg-accent hover:bg-accent-hover text-white font-bold clip-chamfer-sm flex items-center justify-center gap-1 shadow-[0_0_8px_var(--color-accent-glow)]"
+                title="Calibrate offset so the active line timestamp matches audio playhead"
               >
-                -0.1s
+                <Crosshair className="w-3.5 h-3.5" />
+                <span>Tap to Sync</span>
               </button>
               <button
                 type="button"
                 onClick={handleResetOffset}
-                className="flex-1 py-1 text-xs bg-bg-elevated hover:bg-white/10 border border-border-subtle clip-chamfer-sm text-accent font-medium text-center"
+                className="px-2.5 py-1 text-xs bg-bg-elevated hover:bg-white/10 border border-border-subtle clip-chamfer-sm text-accent font-medium text-center"
               >
-                Reset (0.0s)
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAdjustOffset(+0.1)}
-                className="px-2.5 py-1 text-xs bg-bg-elevated hover:bg-white/10 border border-border-subtle clip-chamfer-sm text-zinc-300"
-              >
-                +0.1s
+                0.0s
               </button>
               <button
                 type="button"
                 onClick={() => handleAdjustOffset(+0.5)}
-                className="px-2.5 py-1 text-xs bg-bg-elevated hover:bg-white/10 border border-border-subtle clip-chamfer-sm text-zinc-300"
+                className="px-2 py-1 text-xs bg-bg-elevated hover:bg-white/10 border border-border-subtle clip-chamfer-sm text-zinc-300"
               >
                 +0.5s
               </button>
+              <button
+                type="button"
+                onClick={() => handleAdjustOffset(+1.0)}
+                className="px-2 py-1 text-xs bg-bg-elevated hover:bg-white/10 border border-border-subtle clip-chamfer-sm text-zinc-300"
+              >
+                +1.0s
+              </button>
             </div>
+          </div>
+
+          {/* Quick Lyrics Tools Row */}
+          <div className="pt-3 border-t border-border-subtle flex items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setWrongLyricsModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-bg-elevated hover:bg-white/10 border border-border-subtle clip-chamfer-sm text-xs text-zinc-300 hover:text-white"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-accent" />
+                <span>Wrong Lyrics?</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setEditLyricsModalOpen(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-bg-elevated hover:bg-white/10 border border-border-subtle clip-chamfer-sm text-xs text-zinc-300 hover:text-white"
+              >
+                <FileText className="w-3.5 h-3.5" />
+                <span>Edit LRC</span>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setMiniLyricsHudOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-bg-elevated hover:bg-white/10 border border-border-subtle clip-chamfer-sm text-xs text-accent hover:text-white"
+            >
+              <Layers className="w-3.5 h-3.5" />
+              <span>Mini HUD</span>
+            </button>
           </div>
         </div>
       )}

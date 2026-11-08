@@ -9,6 +9,7 @@ export * from './lyrics/parseEnhancedLrc';
 export * from './lyrics/parseLrc';
 export * from './lyrics/writeEnhancedLrc';
 export * from './lyrics/wordTiming';
+export * from './lyrics/allCapsFix';
 
 // Sync Engine Math
 export * from './sync/transform';
